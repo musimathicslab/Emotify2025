@@ -1,0 +1,47 @@
+.top-genres {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  gap: 10px; /* Distanza tra titolo e badge */
+}
+
+.top-genres-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Allinea a destra */
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  width: 100%; /* Occupa tutta la larghezza */
+  text-align: right; /* Allinea il testo a destra */
+}
+
+/* Container per i badge */
+.genre-badge-container {
+  display: flex;
+  flex-wrap: wrap; /* Permette ai badge di andare a capo */
+  justify-content: center;
+  gap: 10px; /* Spaziatura uniforme tra i badge */
+  max-width: 800px; /* Per evitare che i badge si allunghino troppo */
+}
+
+/* Badge dei generi */
+.genre-badge {
+  display: inline-block;
+  background-color: var(--highlight-dark);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+/* Messaggi di caricamento ed errore */
+.loading-message,
+.error-message {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--highlight-dark);
+}

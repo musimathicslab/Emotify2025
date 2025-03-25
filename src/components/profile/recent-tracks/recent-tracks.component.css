@@ -1,0 +1,89 @@
+/* Contenitore principale */
+.recent-tracks-card {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Header */
+.recent-tracks-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #f20530;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Lista brani */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Elemento della lista */
+.recent-track-item {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition:
+    background 0.2s ease-in-out,
+    transform 0.2s;
+}
+
+.recent-track-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.02);
+}
+
+/* Numerazione */
+.track-rank {
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 12px;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Immagine album */
+.track-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 12px;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  transition: transform 0.2s ease-in-out;
+}
+
+.track-img:hover {
+  transform: scale(1.1);
+}
+
+/* Informazioni brano */
+.track-info {
+  flex-grow: 1;
+}
+
+.track-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.track-artist {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Messaggio se non ci sono brani */
+.no-tracks-msg {
+  text-align: center;
+  color: #777;
+  font-size: 1rem;
+  padding: 10px;
+}

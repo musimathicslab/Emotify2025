@@ -1,0 +1,317 @@
+/* -------------------------------------------------- */
+/*                  CONTAINER GENERALE                */
+/* -------------------------------------------------- */
+.rating-container {
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 1600px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* -------------------------------------------------- */
+/*                   TITOLI MIGLIORATI                */
+/* -------------------------------------------------- */
+.rating-container h3 {
+  font-size: 28px;
+  color: var(
+    --highlight-dark
+  ); /* Puoi cambiare con un colore fisso se preferisci */
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rating-container h4 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* -------------------------------------------------- */
+/*                SEZIONE EMOZIONI                    */
+/* -------------------------------------------------- */
+.emotion-container {
+  text-align: center;
+  width: 100%;
+}
+
+.emotion-slider-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.emotion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 2fr));
+  gap: 20px;
+  justify-content: center;
+  justify-items: center;
+  padding: 20px 0;
+}
+
+.emotion-card {
+  background: #ffffff;
+  color: #333;
+  border-radius: 15px;
+  width: 120px;
+  height: 120px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0.3s,
+    background 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.emotion-card img {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 6px;
+}
+
+.emotion-card:hover {
+  transform: translateY(-5px) scale(1.05);
+}
+
+.emotion-card.selected {
+  background: var(--highlight-color);
+  color: var(--primary-color);
+  transform: translateY(-5px) scale(1.1);
+}
+
+/* Frecce di navigazione per mobile */
+.arrow-btn {
+  display: none; /* Nascondi di default, verrà mostrato in media query mobile */
+}
+
+/* -------------------------------------------------- */
+/*        SEZIONE SLIDER (PARAMETRI MUSICALI)         */
+/* -------------------------------------------------- */
+.parameter-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 30px;
+  background: #fff; /* Sfondo bianco per contrasto */
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* Desktop version: mostra tutti gli slider insieme */
+.parameter-list-desktop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.parameter-item {
+  flex: 1 1 120px;
+  text-align: center;
+  margin: 0 auto; /* per centrare il contenuto */
+}
+
+.slider-label {
+  display: block !important;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 15px !important;
+  color: #333;
+}
+
+.p-slider {
+  width: 100% !important;
+  min-width: 120px;
+  max-width: 150px;
+}
+
+.slider-range {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.slider-min,
+.slider-max {
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0.8;
+  color: #666;
+}
+
+.slider-value {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.p-rating {
+  display: flex;
+  gap: 8px !important;
+}
+
+/* -------------------------------------------------- */
+/*                PULSANTE DI INVIO                   */
+/* -------------------------------------------------- */
+.submit-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.submit-container p-button {
+  --background: #b53c2e; /* Colore del pulsante */
+  --text-color: #fff;
+}
+
+.submit-container p-button:hover {
+  --background: #a03b2c; /* Hover più scuro */
+}
+
+/* -------------------------------------------------- */
+/*             MOBILE STYLES (max-width:768px)        */
+/* -------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Nascondi la versione desktop dei parametri */
+  .parameter-list-desktop {
+    display: none;
+  }
+
+  /* Mobile: Versione carousel per i parametri */
+  .parameter-slider-mobile {
+    display: block;
+  }
+  .parameter-slider-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .parameter-slider-container .parameter-item {
+    /* In mobile ogni slide occupa il 100% della larghezza */
+    flex: 0 0 100%;
+    box-sizing: border-box;
+  }
+  .parameter-slider-container .parameter-list {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .parameter-slider-container .parameter-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mostra i dots per la navigazione dei parametri */
+  .dots-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  .dots-container span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(51, 51, 51, 0.3);
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .dots-container span.active {
+    background-color: var(--highlight-dark);
+  }
+
+  .emotion-slider-container {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+  }
+  .emotion-grid {
+    display: flex !important; /* Sovrascrive display: grid */
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .emotion-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .emotion-card {
+    flex: 0 0 auto;
+    width: 120px;
+    height: 120px;
+    margin: 0 5px;
+  }
+
+  /* Mostra le frecce di navigazione */
+  .arrow-btn {
+    display: flex;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 2rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .arrow-btn:hover {
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .arrow-btn.left {
+    left: 0;
+    margin-left: 5px;
+  }
+  .arrow-btn.right {
+    right: 0;
+    margin-right: 5px;
+  }
+}
+
+/* -------------------------------------------------- */
+/*             DESKTOP STYLES (min-width:769px)       */
+/* -------------------------------------------------- */
+@media (min-width: 769px) {
+  /* Mostra la versione desktop dei parametri */
+  .parameter-list-desktop {
+    display: flex;
+  }
+  /* Nascondi la versione mobile */
+  .parameter-slider-mobile,
+  .dots-container {
+    display: none;
+  }
+
+  /* Emozioni: versione desktop con griglia */
+  .emotion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 2fr));
+    gap: 20px;
+    justify-content: center;
+    justify-items: center;
+    padding: 20px 0;
+  }
+  .arrow-btn {
+    display: none;
+  }
+}

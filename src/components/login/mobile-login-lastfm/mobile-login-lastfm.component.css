@@ -1,0 +1,73 @@
+.mobile-login-container {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--highlight-dark);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.mobile-login-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  /* Utilizza il colore di highlight per il titolo */
+  color: var(--highlight-color);
+  font-family: 'Gochi Hand', sans-serif;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+  /* Puoi personalizzare il colore delle label se desideri */
+  color: var(--primary-color);
+}
+
+input[type='text'],
+input[type='password'] {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.error-message {
+  color: #d9534f; /* rosso per evidenziare l'errore */
+  margin-bottom: 16px;
+  text-align: center;
+  font-weight: bold;
+}
+
+button[type='submit'] {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--highlight-color);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+button[type='submit']:hover {
+  background-color: var(--highlight-dark);
+}
+
+button[type='submit']:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}

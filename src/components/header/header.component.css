@@ -1,0 +1,323 @@
+/* HEADER principale */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Separa logo e icone */
+  padding: 12px 24px;
+}
+
+/* Forza il colore delle icone per abbinarle al titolo "Emotify" */
+.nav-icons .pi {
+  color: var(--highlight-color) !important; /* Colore in linea con la palette */
+  font-size: 1.8rem;
+  transition:
+    color 0.3s ease-in-out,
+    transform 0.2s;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Cambia il colore al passaggio del mouse */
+.nav-icons .pi:hover {
+  color: var(
+    --highlight-dark
+  ) !important; /* Versione più scura della palette */
+  transform: scale(1.2);
+}
+
+/* Rimuovi il background dei pulsanti */
+.p-button.p-button-text {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Logout button: evidenziato con un colore in linea con la palette */
+.logout-btn {
+  color: var(--highlight-color) !important;
+}
+
+/* Logo e titolo a sinistra */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+}
+
+.title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Gochi Hand', sans-serif;
+}
+
+/* Hamburger (inizialmente nascosto su desktop) */
+.hamburger-menu {
+  display: none;
+  font-size: 2rem;
+  color: var(--highlight-color);
+  cursor: pointer;
+}
+
+/* Dropdown menu (nascondilo di default su desktop) */
+.dropdown-menu {
+  display: none;
+  position: fixed; /* Fissa in basso allo schermo */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  /* Rimuovi o riduci l'effetto blur, se non lo desideri */
+  backdrop-filter: blur(2px);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  /* Inizialmente nascosto (fuori dallo schermo) */
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Mostra il dropdown quando è aperto */
+.dropdown-menu.open {
+  transform: translateY(0);
+}
+
+/* Media query per dispositivi mobile */
+@media screen and (max-width: 768px) {
+  /* Nascondi le icone della navbar su mobile e mostra l'hamburger */
+  .nav-icons {
+    display: none;
+  }
+  .hamburger-menu {
+    display: block;
+  }
+}
+
+/* Media query per dispositivi desktop: nascondi hamburger e dropdown */
+@media screen and (min-width: 769px) {
+  .hamburger-menu,
+  .dropdown-menu {
+    display: none !important;
+  }
+}
+
+/* Contenitore a DESTRA per icone + hamburger */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Spazio tra icone e hamburger */
+  margin-left: auto; /* Spinge a destra */
+}
+
+/* Navbar icone (desktop) */
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Pulsanti navbar */
+.nav-btn {
+  color: var(--highlight-color) !important;
+  background: transparent !important;
+  border: none;
+  font-size: 1.3rem;
+  transition:
+    color 0.3s ease-in-out,
+    transform 0.2s;
+}
+
+.nav-btn:hover {
+  color: var(--highlight-dark) !important;
+  transform: scale(1.1);
+}
+
+/* Logout button per menu */
+.logout-btn.menu-btn {
+  color: var(--accent-color) !important;
+  font-weight: bold;
+}
+
+/* Hamburger (inizialmente nascosto su desktop) */
+.hamburger-menu {
+  display: none;
+  font-size: 2rem;
+  color: var(--highlight-color);
+  cursor: pointer;
+}
+
+.menu-btn {
+  width: 100%;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+/* ✅ RESPONSIVE */
+@media screen and (max-width: 768px) {
+  /* Nasconde icone navbar su mobile, mostra hamburger */
+  .nav-icons {
+    display: none;
+  }
+  .hamburger-menu {
+    display: block;
+  }
+
+  /* Riduci logo e titolo */
+  .logo {
+    width: 40px;
+    height: 40px;
+  }
+  .title {
+    font-size: 22px;
+  }
+}
+
+/* Pulsanti per le impostazioni */
+.settings-btn {
+  color: var(--highlight-color);
+}
+
+/* Dialog delle impostazioni */
+.p-dialog {
+  max-width: 90%;
+  border-radius: 16px; /* Arrotonda gli angoli */
+  padding: 20px;
+  /* Per integrare la palette, potresti usare un box-shadow soft basato sui colori della palette */
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.p-dialog-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--primary-color);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 12px;
+}
+
+/* Sezione impostazioni */
+.setting-section {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  text-align: center; /* Centra il contenuto orizzontalmente */
+}
+
+.setting-section h3 {
+  font-size: 18px;
+  margin-bottom: 6px;
+  color: var(--primary-color);
+}
+
+.setting-section p {
+  font-size: 14px;
+  color: var(--primary-color);
+  margin-bottom: 12px;
+}
+
+/* Linea divisoria tra le sezioni */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+}
+
+/* Migliora i pulsanti delle impostazioni */
+.setting-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background: var(--accent-color); /* Usa il colore accento per evidenziare */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  /* Rimosso box-shadow per coerenza con il look minimal */
+  transition: all 0.3s ease-in-out;
+}
+
+.setting-btn:hover {
+  background: var(--highlight-dark);
+  transform: translateY(-2px);
+}
+
+/* Icone all'interno dei pulsanti delle impostazioni */
+.setting-btn i {
+  font-size: 18px;
+}
+
+/* Contenitore generale della modale */
+.settings-container {
+  padding: 20px;
+}
+
+/* Titoli delle sezioni impostazioni */
+.setting-title {
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Paragrafi di descrizione nelle impostazioni */
+.settings-container p {
+  font-size: 14px;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+}
+
+/* Divider tra sezioni */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+}
+
+@media screen and (max-width: 768px) {
+  /* Centra il contenuto della header */
+  .header {
+    justify-content: center;
+    text-align: center;
+  }
+  /* Centra il contenitore del logo e del titolo */
+  .logo-container {
+    margin: 0 auto;
+    justify-content: center;
+  }
+  /* Riduci le dimensioni per mobile */
+  .logo {
+    width: 40px;
+    height: 40px;
+  }
+  .title {
+    font-size: 22px;
+  }
+
+  /* Nascondi le icone navbar e mostra l'hamburger */
+  .nav-icons {
+    display: none;
+  }
+  .hamburger-menu {
+    display: block;
+  }
+}

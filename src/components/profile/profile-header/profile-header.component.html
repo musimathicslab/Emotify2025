@@ -1,0 +1,13 @@
+<ng-container *ngIf="user">
+  <div class="profile-header">
+    <img
+      [src]="
+        user.image && user.image.length > 2 && user.image[2]['#text']
+          ? user.image[2]['#text']
+          : 'img/profile.jpg'
+      "
+      alt="Avatar"
+      class="avatar" />
+    <h2>{{ user.name }}</h2>
+  </div>
+</ng-container>

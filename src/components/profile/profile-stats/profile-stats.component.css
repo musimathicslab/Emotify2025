@@ -1,0 +1,37 @@
+/* 🌟 Stile migliorato della stats-card */
+.stats-card {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  background: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+}
+
+/* 🌟 Effetto hover per un tocco interattivo */
+.stats-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 🌟 Stile del contenuto */
+.stats-container {
+  padding: 10px;
+  font-size: 1.1rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* 🌟 Icone con spazio */
+.stats-container i {
+  color: var(--primary-color);
+  margin-right: 6px;
+}
+
+/* 🌟 Migliora il font nei numeri e nelle date */
+.stats-container strong {
+  color: var(--accent-color);
+  font-weight: bold;
+}

@@ -1,0 +1,111 @@
+.top-artists-card {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Header */
+.top-artists-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #f20530;
+}
+
+/* Lista */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+/* Elementi artista */
+.artist-item {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2); /* Trasparente con effetto vetro */
+  border-radius: 12px;
+  padding: 12px;
+  position: relative;
+  margin-bottom: 12px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Bordo sottile per effetto vetro */
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Hover */
+.artist-item:hover {
+  transform: translateY(-3px);
+}
+
+/* Numero ranking */
+.rank {
+  font-size: 20px;
+  font-weight: bold;
+  width: 30px;
+  text-align: center;
+}
+
+/* Immagini artista */
+.artist-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s ease-in-out;
+}
+
+.artist-img:hover {
+  transform: scale(1.1);
+}
+
+/* Informazioni artista */
+.artist-info {
+  flex-grow: 1;
+}
+
+.artist-name {
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+  transition: color 0.2s ease-in-out;
+}
+
+.artist-name:hover {
+  color: #f20530;
+}
+
+/* Barra progresso */
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #ddd;
+  border-radius: 5px;
+  margin: 5px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Progress bar con colori della classifica */
+.progress {
+  height: 100%;
+  transition: width 0.5s ease-in-out;
+  border-radius: 5px;
+}
+
+/* Percentuale */
+.percentage {
+  font-size: 12px;
+  font-weight: bold;
+  position: absolute;
+  right: 10px;
+}
+
+/* Stile per il messaggio di nessun dato */
+.no-data {
+  color: #888;
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}

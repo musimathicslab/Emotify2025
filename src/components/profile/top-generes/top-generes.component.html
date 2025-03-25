@@ -1,0 +1,20 @@
+<p-card class="top-artists-card">
+  <div class="top-genres">
+    <div class="top-genres-header">
+      <h3>Generi più ascoltati</h3>
+    </div>
+
+    <!-- Messaggio di caricamento -->
+    <div *ngIf="loading" class="loading-message">Caricamento...</div>
+
+    <!-- Messaggio di errore -->
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+
+    <!-- Container per i badge -->
+    <div *ngIf="topGenres.length > 0" class="genre-badge-container">
+      <span *ngFor="let genre of topGenres" class="genre-badge">
+        {{ genre }}
+      </span>
+    </div>
+  </div>
+</p-card>

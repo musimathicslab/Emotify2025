@@ -1,0 +1,118 @@
+<form [formGroup]="formGroup">
+  <div class="rating-container">
+    <h3>Valuta la canzone</h3>
+
+    <!-- Sezione emozioni -->
+    <div class="emotion-container">
+      <h4>Quale emozione rappresenta il brano che hai appena ascoltato?</h4>
+
+      <!-- Container per la scrollbar e le frecce (solo mobile) -->
+      <div class="emotion-slider-container">
+        <button class="arrow-btn left" (click)="scrollEmotion('left')">
+          ‹
+        </button>
+        <div class="emotion-grid" #emotionGrid>
+          <div
+            *ngFor="let emotion of emotions"
+            class="emotion-card"
+            [class.selected]="
+              formGroup.get('selectedEmotion')?.value === emotion.code
+            "
+            (click)="selectEmotion(emotion.code)">
+            <img [src]="emotion.img" [alt]="emotion.name" />
+            <span>{{ emotion.name }}</span>
+          </div>
+        </div>
+        <button class="arrow-btn right" (click)="scrollEmotion('right')">
+          ›
+        </button>
+      </div>
+    </div>
+
+    <!-- Sezione parametri musicali -->
+    <div class="parameter-container">
+      <h4>
+        Identifica i parametri della canzone ideale per te per questa emozione
+      </h4>
+
+      <!-- Sezione parametri musicali, versione desktop -->
+      <div class="parameter-list-desktop">
+        <div
+          *ngFor="let paramControl of parameterControls.controls; let i = index"
+          class="parameter-item"
+          [formGroup]="getFormGroup(paramControl)">
+          <label
+            class="slider-label"
+            pTooltip="{{ getParameterTooltip(i) }}"
+            tooltipPosition="top">
+            {{ getParameterLabel(i) }}
+          </label>
+          <div class="slider-range">
+            <span class="slider-min">{{ getSliderMinLabel(i) }}</span>
+            <p-slider
+              formControlName="value"
+              [min]="0"
+              [max]="100"
+              [style]="{ width: '120px' }"></p-slider>
+            <span class="slider-max">{{ getSliderMaxLabel(i) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Versione Mobile: carousel dei parametri -->
+      <div class="parameter-slider-mobile">
+        <div class="parameter-slider-container">
+          <ng-container *ngIf="parameterControls.length > 0">
+            <ng-container
+              *ngTemplateOutlet="
+                parameterSlide;
+                context: {
+                  $implicit: parameterControls.at(activeParameterIndex),
+                  index: activeParameterIndex,
+                }
+              "></ng-container>
+          </ng-container>
+        </div>
+        <div class="dots-container">
+          <span
+            *ngFor="let ctrl of parameterControls.controls; let i = index"
+            [class.active]="i === activeParameterIndex"
+            (click)="goToParameter(i)">
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template per una slide (un parametro) -->
+    <ng-template #parameterSlide let-param let-index="index">
+      <div class="parameter-item" [formGroup]="param">
+        <label
+          class="slider-label"
+          pTooltip="{{ getParameterTooltip(index) }}"
+          tooltipPosition="top">
+          {{ getParameterLabel(index) }}
+        </label>
+        <div class="slider-range">
+          <span class="slider-min">0</span>
+          <p-slider
+            formControlName="value"
+            [min]="0"
+            [max]="100"
+            [style]="{ width: '120px' }"></p-slider>
+          <span class="slider-max">100</span>
+        </div>
+        <span class="slider-value">
+          {{ param.get('value')?.value }}
+        </span>
+      </div>
+    </ng-template>
+
+    <!-- Pulsante invio -->
+    <div class="submit-container">
+      <p-button
+        label="Invia valutazione"
+        (click)="submitRatings()"
+        [disabled]="!formGroup.valid"></p-button>
+    </div>
+  </div>
+</form>

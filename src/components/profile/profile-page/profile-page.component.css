@@ -1,0 +1,150 @@
+/* Contenitore principale che avvolge tutto (nuovo) */
+.page-container {
+  width: 100%;
+  max-width: 100%; /* Evita che si espanda oltre lo schermo */
+  margin: 0 auto;
+  padding: 0 10px; /* Spazio orizzontale su mobile/desktop */
+  box-sizing: border-box;
+  overflow-x: hidden; /* Previene scroll orizzontale */
+}
+
+/* 🎯 Layout della pagina del profilo */
+.profile-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 colonne */
+  grid-template-rows: auto 1fr auto; /* Header, contenuto, footer */
+  grid-template-areas:
+    'header header header'
+    'left-column center-column right-column'
+    'footer footer footer';
+  gap: 20px;
+  max-width: 100%; /* Rimosso 1700px per evitare overflow */
+  margin: auto;
+  padding: 20px;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+/* 🎯 Header */
+.header {
+  grid-area: header;
+  display: flex;
+  flex-wrap: wrap; /* Permette di andare a capo se necessario */
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 24px;
+  border-radius: 10px;
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box; /* Include il padding nel calcolo della larghezza */
+  word-wrap: break-word; /* Spezza le parole troppo lunghe */
+  overflow-wrap: break-word; /* Compatibilità con alcuni browser */
+}
+
+/* Responsive header per schermi piccoli */
+@media screen and (max-width: 768px) {
+  .header {
+    padding: 16px; /* Riduci il padding */
+    font-size: 20px; /* Riduci il font-size */
+  }
+}
+
+/* 🎯 Footer */
+.footer {
+  grid-area: footer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* 🎯 Colonne */
+.left-column {
+  grid-area: left-column;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.center-column {
+  grid-area: center-column;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right-column {
+  grid-area: right-column;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 🎯 Migliore separazione visiva tra card */
+.profile-card:not(:last-child),
+.list-container:not(:last-child) {
+  margin-bottom: 20px;
+}
+
+/* 🎯 Box con lista */
+.list-container {
+  border-left: 5px solid var(--accent-color);
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* 🎯 Stili per la lista */
+.list-container li {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.2s ease-in-out;
+}
+
+.list-container li:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Forza la flessibilità nelle colonne */
+.left-column,
+.center-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0; /* Permette agli elementi interni di ridursi */
+}
+
+/* 📱 Responsive migliorato */
+@media screen and (max-width: 1024px) {
+  .profile-container {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-areas:
+      'header header'
+      'left-column right-column'
+      'footer footer';
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .profile-container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'header'
+      'left-column'
+      'center-column'
+      'right-column'
+      'footer';
+  }
+}

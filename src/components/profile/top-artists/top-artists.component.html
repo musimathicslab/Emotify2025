@@ -1,0 +1,46 @@
+<p-card class="top-artists-card">
+  <div class="top-artists-header">
+    <h3>Artisti più ascoltati</h3>
+  </div>
+
+  <ul *ngIf="topArtists.length; else noArtists">
+    <li *ngFor="let artist of topArtists; let i = index" class="artist-item">
+      <span class="rank" [ngStyle]="{ color: getRankColor(i) }"
+        >#{{ i + 1 }}</span
+      >
+      <img
+        *ngIf="artist.image; else noImage"
+        [src]="artist.image"
+        alt="{{ artist.name }}"
+        class="artist-img" />
+      <ng-template #noImage>
+        <img
+          src="img/musician-2.png"
+          alt="Immagine non disponibile"
+          class="artist-img" />
+      </ng-template>
+      <div class="artist-info">
+        <a [href]="artist.url" target="_blank" class="artist-name">
+          {{ artist.name }}
+        </a>
+        <div class="progress-bar">
+          <div
+            class="progress"
+            [ngStyle]="{
+              width: artist.percentage + '%',
+              'background-color': getRankColor(i),
+            }"></div>
+        </div>
+        <span class="percentage" [ngStyle]="{ color: getTextColor(i) }">
+          {{ artist.percentage | number: '1.0-0' }}%
+        </span>
+      </div>
+    </li>
+  </ul>
+
+  <ng-template #noArtists>
+    <div class="no-data">
+      <p><i class="pi pi-info-circle"></i> ️ Nessun artista disponibile.</p>
+    </div>
+  </ng-template>
+</p-card>

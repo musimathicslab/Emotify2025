@@ -1,0 +1,46 @@
+.music-listening-times-card {
+  width: 100%;
+  max-width: 500px;
+  /* Non cambiare lo stile dell’header, se ti piace così */
+}
+
+.music-listening-times-header {
+  /* Mantieni lo stile attuale */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.listening-times-list {
+  list-style: none; /* rimuove i bullet */
+  padding: 0;
+  margin: 0;
+}
+
+.listening-times-list li {
+  margin-bottom: 1rem; /* Spazio tra le fasce orarie */
+}
+
+.time-range-label {
+  margin-right: 0.5rem;
+  font-weight: bold;
+}
+
+.no-data {
+  color: #888;
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+
+.no-mood {
+  color: #999;
+  font-style: italic;
+}
+
+/* Stile extra per i p-tag (PrimeNG) che mostrano i mood */
+.mood-badge {
+  margin-right: 0.5rem; /* Spazio orizzontale tra i tag */
+  margin-bottom: 0.5rem; /* Spazio verticale se vanno a capo */
+}

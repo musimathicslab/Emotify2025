@@ -1,0 +1,61 @@
+.profile-header-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 12px;
+  /* Rimosso il box-shadow per un look più minimal */
+  box-shadow: none;
+  text-align: center;
+  background: var(--primary-color); /* Colore solido in linea con la palette */
+  color: var(--secondary-color); /* Testo con colore chiaro per contrasto */
+  min-height: 160px;
+}
+
+h2 {
+  color: var(
+    --accent-color
+  ); /* Usa il colore accento per evidenziare il titolo */
+  text-shadow: none; /* Rimosso l'effetto ombra */
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Miglioriamo lo stile dell'avatar */
+.avatar {
+  width: 130px; /* Leggermente più grande per evidenziare il profilo */
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--accent-color); /* Bordo in linea con il colore accento */
+  margin-bottom: 10px;
+  box-shadow: none; /* Rimosso l'ombreggiatura per coerenza */
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Effetto hover per dare dinamicità */
+.avatar:hover {
+  transform: scale(1.1); /* Leggero zoom al passaggio del mouse */
+}
+
+/* MEDIA QUERY per schermi piccoli */
+@media (max-width: 768px) {
+  .profile-header-card {
+    padding: 10px;
+    min-height: auto; /* Evita troppo spazio in verticale */
+  }
+
+  .avatar {
+    width: 90px; /* Riduci l'avatar su mobile */
+    height: 90px;
+  }
+
+  h2 {
+    font-size: 1.2rem; /* Riduci leggermente il testo */
+    margin-bottom: 5px;
+  }
+}

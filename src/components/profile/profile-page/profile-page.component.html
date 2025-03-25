@@ -1,0 +1,30 @@
+<div class="page-container">
+  <!-- Contenuto principale della pagina -->
+  <div class="profile-container">
+    <!-- Header su tutta la larghezza -->
+    <div class="header">
+      <app-profile-header [user]="userProfile"></app-profile-header>
+    </div>
+
+    <!-- Colonna sinistra -->
+    <div class="left-column">
+      <app-profile-stats [user]="userProfile"></app-profile-stats>
+      <app-top-generes [username]="username"></app-top-generes>
+      <app-recent-tracks [username]="username"></app-recent-tracks>
+    </div>
+
+    <!-- Colonna centrale -->
+    <div class="center-column">
+      <app-music-listening-times></app-music-listening-times>
+      <app-favorite-artists-by-mood></app-favorite-artists-by-mood>
+      <app-favorite-songs-by-mood></app-favorite-songs-by-mood>
+    </div>
+
+    <!-- Colonna destra -->
+    <div class="right-column">
+      <app-top-artists [username]="username"></app-top-artists>
+      <app-top-tracks [username]="username"></app-top-tracks>
+      <app-mood-statistic></app-mood-statistic>
+    </div>
+  </div>
+</div>

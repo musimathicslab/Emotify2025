@@ -1,0 +1,40 @@
+div#graphContainer {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  margin: 0 auto; /* Centra il grafico */
+  background: white;
+  overflow-x: auto; /* Abilita lo scroll orizzontale */
+  overflow-y: hidden;
+  white-space: nowrap; /* Evita il wrapping del contenuto */
+}
+
+svg {
+  position: relative; /* Puoi mantenere absolute se necessario, ma in questo caso relative aiuterà a non staccare dal flusso */
+  min-width: 800px; /* Imposta la larghezza minima pari al grafico */
+  overflow: visible;
+  z-index: 1;
+}
+
+path {
+  transition: all 0.3s ease;
+}
+
+path:hover {
+  opacity: 0.9;
+}
+
+text {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  fill: #000;
+  font-weight: bold;
+}
+
+/* Mobile: se vuoi anche ridurre l'altezza */
+@media (max-width: 768px) {
+  div#graphContainer {
+    height: 300px; /* Riduci l'altezza su mobile */
+  }
+}

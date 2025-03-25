@@ -1,0 +1,398 @@
+@import 'primeicons/primeicons.css';
+
+:root {
+  /* Palette Vintage Minimal */
+  --primary-color: #2e2e2e; /* Testo: Nero carbone */
+  --secondary-color: #fdfbd4; /* Sfondo primario: Crema */
+  --accent-color: #d66a50; /* Accento: Rosso mattone */
+  --highlight-color: #43996f; /* Alternativo: Verde salvia */
+  --highlight-dark: #a63d2f; /* Testo alternativo: Marrone scuro */
+
+  /* Sfondo e superfici */
+  --background-color: #f5f5f5; /* Sfondo principale: Crema */
+  --surface-card: #f0e6d2; /* Superfici: Sabbia chiaro */
+  --surface-ground: #fff5e1;
+  --text-color: #2e2e2e; /* Testo principale */
+
+  /* Bordi e ombre */
+  --border-color: var(--highlight-dark);
+  --box-shadow: none; /* Ombreggiature rimosse */
+
+  /* Font */
+  --font-family: 'Quicksand', sans-serif;
+
+  /* ---------- OVERRIDE PRIME STEPS ---------- */
+  /* Colore della linea che collega gli step */
+  --p-steps-separator-background: var(--accent-color) !important;
+
+  /* Arrotondamento del link */
+  --p-steps-item-link-border-radius: 8px !important;
+
+  /* Colore testo step (non attivo) */
+  --p-steps-item-label-color: var(--primary-color) !important;
+  /* Colore testo step attivo */
+  --p-steps-item-label-active-color: var(--highlight-dark) !important;
+  /* Sfondo del numero (step “cerchio”) */
+  --p-steps-item-number-background: var(--accent-color) !important;
+  /* Bordo del numero (se vuoi un effetto circolare in evidenza) */
+  --p-steps-item-number-border-color: var(--accent-color) !important;
+  /* Quando lo step è attivo, cambia bordo e sfondo */
+  --p-steps-item-number-active-border-color: var(--highlight-dark) !important;
+  --p-steps-item-number-active-background: var(--highlight-dark) !important;
+  /* Colore del testo dentro il numero (step “cerchio”) */
+  --p-steps-item-number-color: #fff !important;
+  --p-steps-item-number-active-color: #fff !important;
+  /* Rimuovi eventuali ombre */
+  --p-steps-item-shadow: none !important;
+
+  /* ---------- PULSANTI PRIME NG ---------- */
+  --p-button-font-family: var(--font-family) !important;
+
+  /* Pulsante primario */
+  --p-button-primary-background: var(--highlight-dark) !important;
+  --p-button-primary-border-color: var(--highlight-dark) !important;
+  --p-button-primary-text-color: var(--surface-card) !important;
+  --p-button-primary-hover-background: #b0533f !important;
+  --p-button-primary-hover-border-color: #b0533f !important;
+  --p-button-primary-active-background: #993d2f !important;
+  --p-button-primary-active-border-color: #993d2f !important;
+
+  /* Pulsante secondario */
+  --p-button-secondary-background: var(--secondary-color) !important;
+  --p-button-secondary-border-color: var(--secondary-color) !important;
+  --p-button-secondary-text-color: #ffffff !important;
+  --p-button-secondary-hover-background: #d1a88c !important;
+  --p-button-secondary-hover-border-color: #d1a88c !important;
+  --p-button-secondary-active-background: #b38d73 !important;
+  --p-button-secondary-active-border-color: #b38d73 !important;
+
+  /* Pulsante accent */
+  --p-button-accent-background: var(--accent-color) !important;
+  --p-button-accent-border-color: var(--accent-color) !important;
+  --p-button-accent-text-color: #ffffff !important;
+  --p-button-accent-hover-background: #c25c45 !important;
+  --p-button-accent-hover-border-color: #c25c45 !important;
+  --p-button-accent-active-background: #a7503b !important;
+  --p-button-accent-active-border-color: #a7503b !important;
+
+  /* Pulsante evidenziato */
+  --p-button-highlight-background: var(--highlight-color) !important;
+  --p-button-highlight-border-color: var(--highlight-color) !important;
+  --p-button-highlight-text-color: #ffffff !important;
+  --p-button-highlight-hover-background: var(--highlight-dark) !important;
+  --p-button-highlight-hover-border-color: var(--highlight-dark) !important;
+  --p-button-highlight-active-background: #5a6d77 !important;
+  --p-button-highlight-active-border-color: #5a6d77 !important;
+
+  /* Pulsante disabilitato */
+  --p-button-disabled-background: #d1d1d1 !important;
+  --p-button-disabled-border-color: #d1d1d1 !important;
+  --p-button-disabled-text-color: #7d7d7d !important;
+
+  --p-rating-transition-duration: 0.3s !important;
+  --p-rating-focus-ring-width: 2px !important;
+  --p-rating-focus-ring-style: solid !important;
+  --p-rating-focus-ring-offset: 0 !important;
+  --p-rating-focus-ring-shadow: none !important;
+  --p-rating-icon-size: 1.2rem !important;
+  --p-rating-icon-color: #ccc !important;
+  --p-rating-icon-hover-color: var(--accent-color) !important;
+  --p-rating-icon-active-color: var(--highlight-color) !important;
+  --p-rating-focus-ring-color: rgba(2, 94, 115, 0.4) !important;
+}
+
+/* Effetto hover migliorato per i pulsanti */
+.p-button {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.p-button:hover {
+  filter: brightness(1.2) !important;
+  transform: scale(1.05) !important;
+}
+
+.p-button:active {
+  filter: brightness(0.9) !important;
+  transform: scale(0.98) !important;
+}
+
+body {
+  background-color: var(--background-color);
+}
+
+body.ios .header {
+  padding-top: calc(env(safe-area-inset-top) + 8px) !important;
+}
+
+.p-button .pi {
+  transition: transform 0.2s ease-in-out;
+}
+
+.p-button:hover .pi {
+  transform: scale(1.2);
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.p-button:active .pi {
+  animation: bounce 0.3s;
+}
+
+.p-button:hover .pi-arrow-right {
+  transform: translateX(5px);
+}
+
+.p-button:hover .pi-arrow-left {
+  transform: translateX(-5px);
+}
+
+/* Rimosso l'effetto glow che utilizzava ombreggiature */
+.final-button {
+  /* Nessuna animazione con box-shadow */
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 🌍 Reset globale */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-family);
+}
+
+/* 📌 Titoli */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: bold;
+  color: var(--primary-color);
+  text-transform: uppercase;
+}
+
+/* 📌 Stile pulsanti PrimeNG */
+.p-button {
+  background: var(--primary-color);
+  border: none;
+  font-weight: bold;
+  color: #ffffff;
+  transition: background 0.3s ease-in-out;
+}
+
+.p-button:hover {
+  background: #3c3c3c;
+}
+
+/* 📌 Stile delle card */
+.p-card {
+  background: var(--surface-card);
+  color: var(--text-color);
+  border: var(--surface-card);
+  border-radius: 10px;
+  box-shadow: none !important;
+}
+
+/* 📌 Form e input */
+input,
+textarea,
+select {
+  background: var(--surface-card);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  border-radius: 5px;
+  outline: none;
+  transition: border 0.3s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary-color);
+}
+
+/* 📌 Link */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: var(--accent-color);
+}
+
+/* 📌 Miglioramenti agli slider PrimeNG */
+.p-slider .p-slider-handle {
+  background: var(--primary-color);
+}
+
+.p-slider .p-slider-range {
+  background: var(--primary-color);
+}
+
+.p-slider .p-slider-track {
+  background: var(--border-color);
+}
+
+/* 📌 Header */
+
+/* Font personalizzate */
+.orbitron-200 {
+  font-family: 'Orbitron', serif;
+  font-optical-sizing: auto;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.gochi-hand-regular {
+  font-family: 'Gochi Hand', serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.intro-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  width: 250px; /* Ridotto rispetto ai 400px originali */
+  text-align: center;
+  padding: 20px;
+  margin: 0 auto; /* Centro il box */
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-text {
+  margin-top: 10px;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.error-container {
+  margin-bottom: 10px;
+}
+
+/* Riduci la larghezza massima del toast su schermi piccoli */
+@media (max-width: 768px) {
+  .p-toast {
+    max-width: 90% !important;
+    left: 5% !important;
+    right: auto !important;
+  }
+
+  .p-toast .p-toast-message {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
+
+  .p-toast .p-toast-icon-success {
+    font-size: 1.2rem;
+  }
+}
+
+/* Card di base, riutilizzabile per Artists e Songs */
+.favorite-card {
+  width: 100%;
+  max-width: 500px; /* stessa larghezza massima per coerenza */
+  margin-bottom: 1.5rem; /* spazio tra le card */
+}
+
+/* Header con titolo */
+.favorite-header {
+  margin-bottom: 1rem;
+}
+
+.favorite-header h3 {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--primary-color); /* usa il tuo colore primario */
+  margin: 0;
+}
+
+/* Contenuto scrollabile, con max-height */
+.favorite-content {
+  max-height: 300px; /* limita l’altezza, scorrimento se supera */
+  overflow-y: auto;
+  position: relative;
+  padding-right: 4px; /* lascia spazio per la scrollbar */
+}
+
+/* Lista di mood e relative voci */
+.mood-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mood-list li {
+  display: flex;
+  flex-wrap: wrap; /* i badge vanno a capo se serve */
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Label che mostra il nome del mood */
+.mood-label {
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* Badge comune per artisti/canzoni */
+.mood-badge {
+  display: inline-block;
+  background-color: #f0f2f5;
+  color: #333;
+  padding: 5px 10px;
+  margin: 5px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+/* Messaggio "nessun dato" */
+.no-data {
+  color: #888;
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+/* Stato di caricamento: centro spinner e testo */
+.loading-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* Occupa tutta l'altezza del contenitore */
+  padding: 20px;
+  text-align: center;
+}

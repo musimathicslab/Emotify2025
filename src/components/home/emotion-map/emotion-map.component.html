@@ -1,0 +1,41 @@
+<div class="emotion-container">
+  <h1 class="emotion-title">Scegli l’emozione che provi in questo momento:</h1>
+  <!-- Cambia il viewBox in base alla modalità -->
+  <svg
+    #svgContainer
+    [attr.viewBox]="isMobile ? '0 0 600 800' : '0 0 900 600'"
+    xmlns="http://www.w3.org/2000/svg">
+    <g
+      *ngFor="let emotion of emotions; let i = index"
+      [attr.id]="'group-' + i"
+      [attr.transform]="'translate(' + emotion.x + ',' + emotion.y + ')'"
+      (mouseenter)="onMouseEnter($event, emotion)"
+      (mousemove)="updateTooltipPosition($event)"
+      (mouseleave)="onMouseLeave()"
+      (click)="onEmotionClick.emit(emotion.label)">
+      <!-- Cerchi concentrici animati -->
+      <circle
+        *ngFor="let level of [1, 2, 3, 4, 5]"
+        [attr.r]="emotion.baseRadius - level * 12"
+        [attr.fill]="emotion.color"
+        [attr.fill-opacity]="0.2"></circle>
+
+      <!-- Cerchio principale -->
+      <circle
+        [attr.id]="'circle-' + i"
+        [attr.r]="emotion.baseRadius"
+        [attr.fill]="emotion.color"
+        [attr.fill-opacity]="0.5"
+        [attr.stroke-width]="0"></circle>
+    </g>
+  </svg>
+
+  <!-- Tooltip -->
+  <div
+    *ngIf="hoveredEmotion"
+    class="tooltip"
+    [style.left.px]="tooltipPosition.x"
+    [style.top.px]="tooltipPosition.y">
+    <h3>{{ hoveredEmotion.label }}</h3>
+  </div>
+</div>

@@ -1,0 +1,211 @@
+/* Box stepper */
+.custom-steps {
+  top: 0;
+  z-index: 999;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.p-button {
+  padding: 20px;
+}
+
+h2 {
+  padding: 10px;
+}
+/* Dimensione e stile etichetta (nome step) */
+.p-steps .p-steps-item .p-steps-item-label {
+  font-size: 1rem; /* più grande di default */
+  font-weight: 500; /* leggermente in grassetto */
+  color: #333; /* testo scuro su sfondo chiaro */
+}
+
+/* Cerchio del numero step */
+.p-steps .p-steps-item .p-steps-item-number {
+  width: 32px !important; /* più grande del default (24px) */
+  height: 32px !important;
+  font-size: 0.9rem !important; /* testo più grande dentro il cerchio */
+  font-weight: 600 !important; /* più marcato */
+  border: 2px solid #f28705 !important; /* uno spessore maggiore */
+  color: #333 !important; /* colore testo step non attivo */
+  background-color: #f8f9fa !important; /* se vuoi differenziarlo dallo sfondo */
+  border-radius: 50% !important; /* cerchio perfetto */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Step attivo */
+.p-steps .p-steps-item.p-highlight .p-steps-item-number {
+  background-color: #f20530 !important; /* rosso primario */
+  border-color: #f20530 !important;
+  color: #fff !important; /* testo bianco */
+}
+
+.context-container {
+  text-align: center;
+  margin: 30px 30px 50px;
+}
+
+.context-container > div {
+  margin-top: 20px;
+}
+
+/* Layout delle card */
+.card-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Effetto hover sulle card */
+.card-container {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.card-container:hover {
+  transform: scale(1.05);
+}
+
+/* Stile delle card */
+p-card {
+  width: 180px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+  text-align: center;
+  background-color: #ffffff !important;
+  padding: 0;
+}
+
+p-card.selected {
+  border: 3px solid #007bff;
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+p-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Stile delle immagini */
+.option-image {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  display: block;
+  border-radius: 0;
+  background-color: #ffffff;
+}
+
+/* Contenitore dei pulsanti */
+.action-container {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Stile dei pulsanti */
+.p-button {
+  width: 150px;
+  height: 50px;
+  font-size: 16px;
+  border-radius: 25px;
+}
+.card-container:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+}
+
+@keyframes bounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.card-container:active {
+  animation: bounce 0.2s ease-in-out;
+}
+
+/* 📌 Stile per TABLET (600px - 1024px) */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .card-container {
+    width: auto; /* Rimuove width: 100% per i tablet */
+  }
+
+  p-card {
+    width: auto;
+  }
+  .card-row {
+    grid-template-columns: repeat(4, minmax(160px, 1fr)); /* 2 colonne */
+  }
+}
+
+/* Stepper Responsive */
+@media screen and (max-width: 768px) {
+  /* Contenitore dello stepper */
+  .custom-steps {
+    overflow-x: auto; /* Abilita lo scroll orizzontale */
+    white-space: nowrap; /* Impedisce la rottura degli elementi */
+    display: flex;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+    width: 100%;
+  }
+
+  .custom-steps ::ng-deep .p-steps {
+    flex-wrap: nowrap; /* Evita che gli step vadano a capo */
+    width: max-content; /* Usa solo lo spazio necessario */
+    display: flex;
+  }
+
+  .custom-steps ::ng-deep .p-steps-item {
+    flex: 1 1 auto; /* Gli step prendono la dimensione necessaria */
+    min-width: 100px; /* Evita che siano troppo piccoli */
+    text-align: center;
+  }
+
+  .custom-steps ::ng-deep .p-steps-item .p-menuitem-link {
+    font-size: 0.85rem; /* Riduce il font degli step */
+    padding: 5px; /* Riduce la spaziatura */
+  }
+
+  .custom-steps ::ng-deep .p-steps-item .p-steps-number {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 0.75rem !important;
+  }
+  .card-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(160px, 1fr)); /* 2 colonne */
+    gap: 15px; /* Aggiunge spazio tra le card */
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  p-card {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .p-card-content {
+    justify-content: center;
+  }
+}

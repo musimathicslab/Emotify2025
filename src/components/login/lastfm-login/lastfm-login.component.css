@@ -1,0 +1,16 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.p-button-danger {
+  background: var(--highlight-dark) !important;
+  border: none;
+  color: white;
+}
+
+.p-button-danger:hover {
+  background: var(--highlight-dark) !important;
+  filter: brightness(1.1);
+}

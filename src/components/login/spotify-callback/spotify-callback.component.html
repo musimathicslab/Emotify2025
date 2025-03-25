@@ -1,0 +1,21 @@
+<div class="intro-container">
+  <p-card class="login-card">
+    <ng-container *ngIf="isLoading; else errorContent">
+      <div class="loading-container">
+        <p-progressSpinner></p-progressSpinner>
+        <p class="loading-text">Autenticazione in corso... Attendere.</p>
+      </div>
+    </ng-container>
+
+    <ng-template #errorContent>
+      <div class="error-container" *ngIf="errorMessage">
+        <p-message severity="error" text="{{ errorMessage }}"></p-message>
+      </div>
+      <p-button
+        label="Riprova il login"
+        icon="pi pi-sign-in"
+        (click)="retryLogin()"
+        *ngIf="errorMessage"></p-button>
+    </ng-template>
+  </p-card>
+</div>

@@ -1,0 +1,17 @@
+<p-card class="stats-card">
+  <ng-container *ngIf="user">
+    <div class="stats-container">
+      <p>
+        <i class="fa-solid fa-music red-icon"></i> Brani ascoltati:
+        <strong class="highlight">{{ user.playcount }}</strong>
+      </p>
+      <p>
+        <i class="fa-solid fa-clock red-icon"></i> Tempo trascorso ascoltando
+        musica:
+        <strong class="highlight">{{
+          getListeningTime(user.playcount)
+        }}</strong>
+      </p>
+    </div>
+  </ng-container>
+</p-card>

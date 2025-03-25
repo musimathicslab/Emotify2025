@@ -1,0 +1,51 @@
+<p-card class="music-listening-times-card">
+  <!-- Header con icona e titolo -->
+  <div class="music-listening-times-header">
+    <h3>MOMENTI PREFERITI PER ASCOLTARE MUSICA</h3>
+  </div>
+
+  <div class="music-listening-times-content">
+    <!-- Stato di caricamento -->
+    <div *ngIf="loading" class="loading-message">
+      <p-progressSpinner></p-progressSpinner>
+      <p>Caricamento...</p>
+    </div>
+
+    <!-- Stato normale: mostra i dati se disponibili -->
+    <div *ngIf="!loading">
+      <div
+        *ngIf="
+          listeningTimes && Object.keys(listeningTimes).length > 0;
+          else noData
+        ">
+        <ul class="listening-times-list">
+          <!-- Ciclo sulle fasce orarie -->
+          <li *ngFor="let timeRange of Object.keys(listeningTimes)">
+            <strong class="time-range-label">{{ timeRange }}:</strong>
+            <!-- Se la fascia ha dei mood, mostra i tag; altrimenti, "Nessun mood" -->
+            <ng-container
+              *ngIf="getMoodsForTimeRange(timeRange).length > 0; else noMoods">
+              <p-tag
+                *ngFor="let mood of getMoodsForTimeRange(timeRange)"
+                [value]="mood"
+                [severity]="emotionsService.getMoodSeverityByLabel(mood)"
+                pStyleClass="mood-badge">
+              </p-tag>
+            </ng-container>
+            <ng-template #noMoods>
+              <span class="no-mood">Nessun mood</span>
+            </ng-template>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Messaggio se non ci sono dati -->
+      <ng-template #noData>
+        <p class="no-data">
+          <i class="pi pi-info-circle"></i> Nessun dato disponibile sui momenti
+          di ascolto della musica.
+        </p>
+      </ng-template>
+    </div>
+  </div>
+</p-card>

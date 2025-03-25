@@ -1,0 +1,68 @@
+<p-card class="top-tracks-card">
+  <div class="top-tracks-header">
+    <h3>Brani più ascoltati</h3>
+  </div>
+
+  <!-- Stato di caricamento -->
+  <div *ngIf="loading" class="loading-message">
+    <p-progressSpinner></p-progressSpinner>
+    <p>Caricamento...</p>
+  </div>
+
+  <!-- Stato normale: mostra il podio se ci sono almeno 3 tracce -->
+  <div *ngIf="!loading && topTracks && topTracks.length >= 3" class="podium">
+    <!-- Secondo posto -->
+    <div class="podium-item second">
+      <img
+        src="img/silver-medal.png"
+        alt="Medaglia Argento"
+        class="medal-icon" />
+      <div class="track-card">
+        <img
+          [src]="topTracks[1]?.image"
+          alt="{{ topTracks[1]?.name }}"
+          class="track-img" />
+        <div class="track-info">
+          <strong>{{ topTracks[1]?.name }}</strong
+          ><br />
+          <span>{{ topTracks[1]?.artist }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Primo posto -->
+    <div class="podium-item first">
+      <img src="img/gold-medal.png" alt="Medaglia Oro" class="medal-icon" />
+      <div class="track-card">
+        <img
+          [src]="topTracks[0]?.image"
+          alt="{{ topTracks[0]?.name }}"
+          class="track-img" />
+        <div class="track-info">
+          <strong>{{ topTracks[0]?.name }}</strong
+          ><br />
+          <span>{{ topTracks[0]?.artist }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terzo posto -->
+    <div class="podium-item third">
+      <img
+        src="img/bronze-medal.png"
+        alt="Medaglia Bronzo"
+        class="medal-icon" />
+      <div class="track-card">
+        <img
+          [src]="topTracks[2]?.image"
+          alt="{{ topTracks[2]?.name }}"
+          class="track-img" />
+        <div class="track-info">
+          <strong>{{ topTracks[2]?.name }}</strong
+          ><br />
+          <span>{{ topTracks[2]?.artist }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-card>

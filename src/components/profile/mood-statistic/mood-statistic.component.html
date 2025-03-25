@@ -1,0 +1,33 @@
+<p-card class="mood-stats-card">
+  <div class="mood-stats-header">
+    <h3>MOOD PIÙ ASCOLTATI</h3>
+  </div>
+
+  <!-- Stato di caricamento -->
+  <div *ngIf="loading" class="loading-message">
+    <p-progressSpinner></p-progressSpinner>
+    <p>Caricamento...</p>
+  </div>
+
+  <!-- Stato normale: mostra dati se disponibili -->
+  <div
+    *ngIf="!loading && moodStatistics && moodKeys.length > 0"
+    class="mood-list">
+    <ul>
+      <li *ngFor="let mood of moodKeys">
+        <p-tag
+          [value]="mood + ': ' + moodStatistics[mood] + ' brani'"
+          [severity]="emotionsService.getMoodSeverityByLabel(mood)">
+        </p-tag>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Messaggio se non ci sono dati -->
+  <p
+    *ngIf="!loading && (!moodStatistics || moodKeys.length === 0)"
+    class="no-data">
+    <i class="pi pi-info-circle"></i> Nessun dato disponibile sui mood più
+    ascoltati.
+  </p>
+</p-card>

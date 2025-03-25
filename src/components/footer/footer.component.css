@@ -1,0 +1,276 @@
+/* FOOTER BASE */
+.footer {
+  width: 100%;
+  background: var(--background-color); /* Colore solido della palette */
+  color: var(--primary-color);
+  padding: 1.5rem 1rem; /* Aggiunto padding extra per più spazio */
+  font-size: 1rem;
+  font-family: 'Paytone One', sans-serif;
+  box-shadow: none; /* Rimosso il box-shadow per un look più minimal */
+  text-shadow: none; /* Rimosso il text-shadow */
+}
+
+/* LAYOUT PRINCIPALE DEL FOOTER */
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+/* SEZIONE SINISTRA */
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: flex-start;
+  min-width: 250px;
+}
+
+/* LOGO */
+.lab-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  padding: 8px;
+  background: white;
+  border-radius: 12px;
+  /* Ho rimosso il box-shadow per coerenza con il look minimal */
+  transition: transform 0.3s ease-in-out;
+}
+
+.lab-logo:hover {
+  transform: scale(1.15);
+  /* Sostituito il filtro con un effetto leggero per evidenziare */
+  filter: brightness(0.9);
+}
+
+/* TESTO MUSIMATHICS LAB */
+.lab-info {
+  display: flex;
+  flex-direction: column;
+}
+
+/* SEZIONE CENTRALE - COPYRIGHT */
+.footer-center {
+  flex: 1;
+  text-align: center;
+  min-width: 200px;
+  margin: 0.5rem 0; /* Spazio extra per evitare che sia attaccato */
+}
+
+.footer-center p {
+  margin: 0;
+}
+
+/* SEZIONE DESTRA - CREATORS */
+.footer-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: right;
+  min-width: 250px;
+}
+
+/* LISTA CREATORI */
+.creators-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* LINK CREATORS */
+.creators-list a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: bold;
+  transition:
+    color 0.3s ease-in-out,
+    text-decoration 0.3s ease-in-out;
+  padding: 0 5px;
+}
+
+.creators-list a:hover {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+/* SEPARATORE */
+.separator {
+  color: var(--accent-color);
+}
+
+/* 🔹 RESPONSIVE DESIGN */
+
+/* 🔹 Tablet e schermi medi (≤1024px) */
+@media screen and (max-width: 1024px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem; /* Più spazio tra le sezioni */
+  }
+
+  .footer-left,
+  .footer-center,
+  .footer-right {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .footer-left {
+    margin-bottom: 1rem;
+  }
+
+  .footer-center {
+    margin: 1rem 0;
+  }
+
+  .footer-right {
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+
+  .creators-list {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .separator {
+    display: none;
+  }
+}
+
+/* 🔹 Schermi piccoli (≤768px) */
+@media screen and (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 1rem; /* Ancora più spazio tra le sezioni */
+  }
+
+  .footer-left,
+  .footer-center,
+  .footer-right {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .footer-right {
+    flex-direction: column;
+  }
+
+  .creators-list {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .separator {
+    display: none;
+  }
+}
+
+/* 🔹 Schermi molto piccoli (≤480px) */
+@media screen and (max-width: 480px) {
+  .footer {
+    font-size: 0.9rem;
+    padding: 1rem 1rem; /* Più spazio verticale */
+  }
+
+  .footer-center {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .footer-left,
+  .footer-right {
+    margin-bottom: 1rem;
+  }
+
+  .creators-list a {
+    display: block;
+    text-align: center;
+  }
+}
+
+/* Stili per dispositivi con larghezza massima di 768px (tablet e telefoni) */
+@media screen and (max-width: 768px) {
+  .footer-content {
+    flex-direction: column; /* Cambia il layout da orizzontale a verticale */
+    text-align: center; /* Centra il contenuto */
+    gap: 1rem; /* Aggiunge spazio tra gli elementi */
+  }
+
+  .footer-left {
+    flex-direction: column; /* Imposta una disposizione verticale */
+    align-items: center; /* Centra gli elementi */
+    text-align: center;
+  }
+
+  .footer-left p {
+    margin-top: 0.5rem; /* Aggiunge un po' di spazio sopra il testo */
+  }
+
+  .footer-right,
+  .footer-bottom {
+    font-size: 0.9rem; /* Riduce la dimensione del testo */
+  }
+
+  .lab-logo {
+    width: 40px; /* Riduce la dimensione del logo per evitare che occupi troppo spazio */
+    height: 40px;
+  }
+}
+
+.lab-info strong {
+  color: var(--primary-color);
+}
+
+.lab-info strong:hover {
+  color: var(--accent-color);
+}
+
+/* Ulteriore override per mobile: mostra solo logo e testo "Laboratorio di Musimatica" */
+@media screen and (max-width: 768px) {
+  .footer-content {
+    flex-direction: row; /* Mantiene tutto affiancato */
+    justify-content: center; /* Centra gli elementi */
+    align-items: center;
+    gap: 10px; /* Spazio tra logo e testo */
+  }
+
+  .footer-left {
+    display: flex;
+    flex-direction: row; /* Allinea logo e testo sulla stessa riga */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .lab-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+  }
+  .lab-info strong:hover {
+    color: var(--accent-color);
+  }
+  .lab-info {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  /* Nasconde il resto del footer */
+  .footer-center,
+  .footer-right {
+    display: none;
+  }
+}

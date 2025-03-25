@@ -1,0 +1,38 @@
+.high-rating {
+  font-weight: bold;
+  color: #4caf50;
+}
+.low-rating {
+  color: #f44336;
+}
+.save-changes-container {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* Utilizza ::ng-deep per applicare gli stili ai componenti di PrimeNG (oppure disabilita l’ViewEncapsulation) */
+::ng-deep .my-custom-confirm-dialog .p-dialog-header {
+  background-color: #dc3545; /* Rosso, per evidenziare l’azione di eliminazione */
+  color: #fff;
+  font-size: 1.2rem;
+  padding: 1rem;
+}
+
+::ng-deep .my-custom-confirm-dialog .p-dialog-content {
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+::ng-deep .my-custom-confirm-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: center;
+  background-color: #f8f9fa;
+  padding: 1rem;
+}
+
+/* Personalizzazione dei pulsanti (facoltativa) */
+::ng-deep .my-custom-confirm-dialog .p-confirm-dialog .p-button {
+  min-width: 100px;
+  margin: 0 0.5rem;
+}

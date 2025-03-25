@@ -1,0 +1,118 @@
+<header class="header">
+  <!-- Logo e Titolo a sinistra -->
+  <div class="logo-container">
+    <img src="img/icons8-emotions-64-2.png" alt="Emotify Logo" class="logo" />
+    <h1 class="title">Emotify</h1>
+  </div>
+
+  <!-- Contenitore a DESTRA per icone navbar (desktop) e hamburger (mobile) -->
+  <div class="header-right">
+    <!-- Navbar Desktop -->
+    <div class="nav-icons">
+      <p-button
+        icon="pi pi-home"
+        pStyleClass="nav-btn"
+        routerLink="/intro"
+        (click)="onMenuItemClick()"
+        title="Home"></p-button>
+      <p-button
+        icon="pi pi-user"
+        pStyleClass="nav-btn"
+        routerLink="/profile"
+        title="Profilo"></p-button>
+      <p-button
+        icon="pi pi-cog"
+        pStyleClass="nav-btn"
+        (click)="showSettingsModal()"
+        title="Impostazioni"></p-button>
+      <p-button
+        icon="pi pi-sign-out"
+        pStyleClass="logout-btn nav-btn"
+        (click)="logout()"
+        title="Logout"></p-button>
+    </div>
+
+    <!-- Hamburger su Mobile -->
+    <div class="hamburger-menu" (click)="toggleMenu()">
+      <i class="pi pi-bars"></i>
+    </div>
+
+    <!-- Menu a Tendina (dropdown) -->
+    <div class="dropdown-menu" [ngClass]="{ open: menuVisible }">
+      <p-button
+        icon="pi pi-home"
+        label="Home"
+        routerLink="/intro"
+        (click)="onMenuItemClick()"
+        class="dropdown-btn"></p-button>
+      <p-button
+        icon="pi pi-user"
+        label="Profilo"
+        routerLink="/profile"
+        (click)="onMenuItemClick()"
+        class="dropdown-btn"></p-button>
+      <p-button
+        icon="pi pi-cog"
+        label="Impostazioni"
+        (click)="showSettingsModal()"
+        class="dropdown-btn"></p-button>
+      <p-button
+        icon="pi pi-sign-out"
+        label="Logout"
+        (click)="logout()"
+        class="dropdown-btn logout-btn"></p-button>
+    </div>
+  </div>
+</header>
+
+<p-toast></p-toast>
+
+<p-dialog
+  [responsive]="true"
+  [breakpoint]="768"
+  [(visible)]="settingsVisible"
+  modal
+  header="⚙️ Impostazioni">
+  <div class="settings-container">
+    <div class="setting-section">
+      <h3 class="red-title">
+        <i class="fas fa-download"></i> ESPORTA I TUOI DATI
+      </h3>
+      <p>Scarica tutte le valutazioni e le preferenze salvate dall’app.</p>
+      <p-button
+        label="Esporta dati"
+        icon="pi pi-download"
+        class="settings-btn"
+        (click)="exportData()"></p-button>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-section">
+      <h3 class="red-title">
+        <i class="fas fa-sync-alt"></i> RIAVVIA IL TRAINING
+      </h3>
+      <p>
+        Puoi resettare il modello e ripartire dall’inizio con nuove valutazioni.
+      </p>
+      <p-button
+        label="Resetta training"
+        icon="pi pi-refresh"
+        (click)="resetTraining()"></p-button>
+    </div>
+    <div class="divider"></div>
+    <!-- Pulsante per resettare tutti i dati -->
+    <div class="setting-section">
+      <h3 class="red-title">
+        <i class="fas fa-trash-alt"></i> RESETTA TUTTI I DATI
+      </h3>
+      <p>
+        Questa operazione elimina tutti i dati salvati (memoria, pesi del
+        modello, training, ecc.) e riavvia l’app come se fosse la prima volta.
+      </p>
+      <p-button
+        label="Resetta Dati"
+        icon="pi pi-trash"
+        (click)="resetAllData()"
+        class="settings-btn"></p-button>
+    </div>
+  </div>
+</p-dialog>

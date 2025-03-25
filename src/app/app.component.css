@@ -1,0 +1,21 @@
+/* 1. html e body al 100% di altezza */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2. app-root come contenitore flex verticale */
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Copre l’intera altezza della finestra */
+}
+
+/* 3. La classe main-content (o come l'hai chiamata) si espande */
+.main-content {
+  flex: 1; /* Occupa tutto lo spazio rimanente tra header e footer */
+  display: flex;
+  flex-direction: column;
+}

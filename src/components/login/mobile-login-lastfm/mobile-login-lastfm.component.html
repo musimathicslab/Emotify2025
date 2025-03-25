@@ -1,0 +1,27 @@
+<div class="mobile-login-container">
+  <h2>Login Mobile</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        formControlName="username"
+        placeholder="Inserisci il tuo username" />
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        placeholder="Inserisci la tua password" />
+    </div>
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <button type="submit" [disabled]="isLoading">Login</button>
+  </form>
+
+  <div *ngIf="isLoading" class="spinner-container">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+</div>

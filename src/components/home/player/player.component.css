@@ -1,0 +1,228 @@
+/* 🌟 Contenitore principale del player */
+.player-wrapper {
+  width: 95%; /* Occupa quasi tutto lo schermo */
+  max-width: 1500px; /* Ancora più grande */
+  margin: 30px auto;
+  padding-bottom: 40px; /* Più spazio intorno */
+}
+
+/* 🌟 Player più grande e visibile */
+.player-container {
+  padding: 30px;
+}
+
+/* 🌟 Layout interno */
+.player-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px; /* Aumentata la distanza tra gli elementi */
+}
+
+/* 🌟 Pulsanti di controllo con più spazio */
+.p-button-rounded {
+  font-size: 24px;
+
+  margin: 5px; /* Distanza aumentata tra i pulsanti */
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Sezione dei controlli (pulsanti, informazioni sul brano, etc.) */
+.controls {
+  flex: 1;
+}
+
+/* 🌟 Titolo */
+.song-title {
+  font-size: 30px;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-align: center;
+  padding: 5px;
+}
+
+.artist-name {
+  font-size: 20px;
+  color: #666;
+  text-align: center;
+  margin-top: -5px;
+}
+
+/* 🌟 Barra di avanzamento più grande */
+.progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding: 5px 0;
+}
+
+/* 🌟 Album cover enorme */
+.album-cover {
+  width: 250px; /* Ingrandita */
+  height: 250px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+/* 🌟 Slider migliorato */
+.slider-form {
+  width: 100%;
+}
+/* 🌟 Testo del tempo */
+.time-display {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px;
+  color: #666;
+}
+.training-progress-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.training-progress-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.progress-box {
+  padding: 15px;
+  border-radius: 16px;
+  width: 70%;
+  text-align: center;
+  color: white;
+}
+
+.progress-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.progress-wrapper {
+  background-color: #ffffff;
+  border-radius: 8px;
+  height: 16px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--highlight-color);
+  transition: width 0.5s ease-in-out;
+  border-radius: 8px;
+  position: relative;
+}
+
+.progress-text {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+}
+
+/* Media query per schermi piccoli */
+@media (max-width: 768px) {
+  /* Riduci la larghezza della progress box */
+  .progress-box {
+    width: 90%;
+    padding: 10px;
+  }
+
+  /* Adatta il titolo */
+  .progress-title {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  /* Riduci leggermente l'altezza della barra e il font */
+  .progress-wrapper {
+    height: 14px;
+  }
+
+  .progress-text {
+    font-size: 12px;
+    right: 6px; /* Se vuoi avvicinare il testo al bordo */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Disposizione verticale */
+  .player-content {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* spazio tra gli elementi */
+  }
+
+  /* Copertina più piccola */
+  .album-cover {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 20px;
+  }
+
+  .album-cover {
+    order: -1;
+  }
+
+  /* Controlli in colonna */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  /* Titolo e artista più piccoli e centrati */
+  .song-title {
+    font-size: 22px;
+    text-align: center;
+  }
+  .artist-name {
+    font-size: 16px;
+    text-align: center;
+  }
+
+  /* Pulsanti più piccoli e con meno margine */
+  .p-button-rounded {
+    font-size: 20px;
+    margin: 4px;
+  }
+
+  /* Barra di avanzamento in colonna */
+  .progress-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Slider più stretto */
+  .slider-form {
+    width: 80%;
+  }
+
+  /* Testo del tempo più piccolo */
+  .time-display {
+    font-size: 14px;
+  }
+}

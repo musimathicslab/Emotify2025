@@ -1,0 +1,41 @@
+<p-card class="favorite-card">
+  <div class="favorite-header">
+    <h3>CANZONI PREFERITE PER OGNI MOOD</h3>
+  </div>
+
+  <div class="favorite-content">
+    <!-- Stato di caricamento -->
+    <div *ngIf="loading" class="loading-message">
+      <p-progressSpinner></p-progressSpinner>
+      <p>Caricamento...</p>
+    </div>
+
+    <!-- Stato normale: mostra dati se disponibili -->
+    <div *ngIf="!loading">
+      <div
+        *ngIf="
+          favoriteSongsByMood && Object.keys(favoriteSongsByMood).length > 0;
+          else noData
+        ">
+        <ul class="mood-list">
+          <li *ngFor="let mood of Object.keys(favoriteSongsByMood)">
+            <strong class="mood-label">{{ mood }}:</strong>
+            <span
+              *ngFor="let song of favoriteSongsByMood[mood]"
+              class="mood-badge">
+              {{ song }}
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Messaggio se non ci sono dati -->
+      <ng-template #noData>
+        <p class="no-data">
+          <i class="pi pi-info-circle"></i> Nessun dato disponibile sulle
+          canzoni preferite per mood.
+        </p>
+      </ng-template>
+    </div>
+  </div>
+</p-card>

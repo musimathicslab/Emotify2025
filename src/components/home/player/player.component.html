@@ -1,0 +1,110 @@
+<!-- Contenitore generale che gestisce due livelli di caricamento -->
+<!-- 1) Se isPlayerReady$ è false, mostri "Caricamento lettore Spotify" -->
+<!-- 2) Se isPlayerReady$ è true, controlli se esiste un trackId per mostrare il player o un secondo loading -->
+<ng-container *ngIf="isPlayerReady$ | async; else loadingSpotify">
+  <!-- Se isPlayerReady$ è true, controlliamo se c’è un trackId -->
+  <ng-container *ngIf="currentTrackId$ | async as trackId; else waitingTrack">
+    <!-- Se trackId è presente, mostriamo il player vero e proprio -->
+    <div class="player-wrapper">
+      <p-card class="player-container mt-2">
+        <div class="p-d-flex p-ai-center p-jc-between player-content">
+          <!-- Controlli Player -->
+          <div class="p-d-flex p-flex-column controls">
+            <div class="p-d-flex p-ai-center">
+              <p-button
+                icon="pi pi-step-backward"
+                class="p-button-rounded p-mr-2"
+                (click)="previousTrack()">
+              </p-button>
+
+              <p-button
+                [icon]="(isPlaying$ | async) ? 'pi pi-pause' : 'pi pi-play'"
+                class="p-button-rounded p-mr-2"
+                (click)="togglePlay()">
+              </p-button>
+
+              <p-button
+                icon="pi pi-step-forward"
+                class="p-button-rounded"
+                (click)="nextTrack()">
+              </p-button>
+            </div>
+
+            <div class="song-info">
+              <h2 class="song-title">{{ trackTitle$ | async }}</h2>
+              <p class="artist-name">{{ artistName$ | async }}</p>
+            </div>
+
+            <div class="p-d-flex p-ai-center p-jc-between progress-container">
+              <span class="time-display">{{ currentTime$ | async }}</span>
+              <form [formGroup]="formGroup" class="slider-form">
+                <p-slider formControlName="value" pStyleClass="progress-bar">
+                </p-slider>
+              </form>
+              <span class="time-display">{{ totalTime$ | async }}</span>
+            </div>
+          </div>
+
+          <!-- Copertina album -->
+          <div class="album-cover">
+            <img
+              [src]="albumCover$ | async"
+              alt="Album Cover"
+              class="cover-img" />
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Sezione per la valutazione (mostrata solo se trainingCount < trainingLimit) -->
+      <app-rating
+        *ngIf="trainingCount < trainingLimit"
+        (onSubmitRatings)="handleRatings($event)">
+      </app-rating>
+
+      <!-- Barra di progresso dell'addestramento (mostrata se trainingCount < trainingLimit) -->
+      <div
+        class="training-progress-container"
+        *ngIf="trainingCount < trainingLimit">
+        <div class="progress-box">
+          <p class="progress-title">
+            <i class="pi pi-chart-line"></i>
+            Addestramento in corso:
+            {{ trainingCount }} / {{ trainingLimit }}
+          </p>
+          <div class="progress-wrapper">
+            <div
+              class="progress-bar"
+              [style.width]="(trainingCount / trainingLimit) * 100 + '%'">
+              <span class="progress-text">
+                {{ (trainingCount / trainingLimit) * 100 | number: '1.0-0' }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast per i messaggi -->
+      <p-toast></p-toast>
+    </div>
+  </ng-container>
+
+  <!-- Secondo caricamento: se isPlayerReady$ è true ma trackId non è ancora disponibile -->
+  <ng-template #waitingTrack>
+    <p-card class="login-card">
+      <div class="loading-container">
+        <p-progressSpinner></p-progressSpinner>
+        <p class="loading-text">Caricamento del brano in corso...</p>
+      </div>
+    </p-card>
+  </ng-template>
+</ng-container>
+
+<!-- Primo caricamento: se isPlayerReady$ è false, mostra “Caricamento lettore Spotify” -->
+<ng-template #loadingSpotify>
+  <p-card class="login-card">
+    <div class="loading-container">
+      <p-progressSpinner></p-progressSpinner>
+      <p class="loading-text">Caricamento in corso del lettore Spotify...</p>
+    </div>
+  </p-card>
+</ng-template>

@@ -1,0 +1,29 @@
+<p-card class="recent-tracks-card">
+  <!-- Header con icona e titolo -->
+  <div class="recent-tracks-header">
+    <h3>Ultimi brani ascoltati</h3>
+  </div>
+
+  <ul *ngIf="recentTracks.length; else noTracks">
+    <li
+      *ngFor="let track of recentTracks | slice: 0 : limit"
+      class="recent-track-item">
+      <img
+        [src]="track.image[1]['#text'] || 'img/music.png'"
+        alt="cover"
+        class="track-img" />
+      <div class="track-info">
+        <p class="track-title">
+          <strong>{{ track.name }}</strong>
+        </p>
+        <p class="track-artist">{{ track.artist['#text'] }}</p>
+      </div>
+    </li>
+  </ul>
+
+  <ng-template #noTracks>
+    <p class="no-tracks-msg">
+      <i class="fa-solid fa-music"></i> Nessun brano ascoltato di recente.
+    </p>
+  </ng-template>
+</p-card>

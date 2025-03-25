@@ -1,0 +1,61 @@
+/* Stile della card per i mood più ascoltati */
+.mood-stats-card {
+  width: 100%;
+  max-width: 500px;
+
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* Header della card con icona */
+.mood-stats-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Spazio tra icona e titolo */
+  margin-bottom: 1rem; /* Spazio sotto l'header */
+}
+
+.mood-stats-header .icon {
+  width: 50px; /* Dimensione dell'icona */
+  height: 50px;
+  object-fit: contain;
+}
+
+/* Stile della lista dei mood */
+.mood-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Oggetto mood con PrimeNG Chips */
+.mood-item {
+  display: flex;
+  align-items: center;
+}
+
+.mood-chip {
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+/* Stile per il messaggio di nessun dato */
+.no-data {
+  color: #888;
+  font-style: italic;
+  padding: 10px;
+  text-align: center;
+}
+/* Stile dei tag dei mood */
+.mood-tag {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 14px;
+}

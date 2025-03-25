@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Emotify</string>
+    <string name="title_activity_main">Emotify</string>
+    <string name="package_name">com.tuo.dominio.emotify</string>
+    <string name="custom_url_scheme">com.tuo.dominio.emotify</string>
+</resources>

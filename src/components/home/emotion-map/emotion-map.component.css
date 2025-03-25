@@ -1,0 +1,81 @@
+.emotion-container {
+  position: relative;
+  max-width: 900px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  text-align: center;
+  overflow: hidden;
+}
+
+h1.emotion-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  margin: 20px 0;
+}
+
+svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: auto;
+}
+
+/* Cerchi */
+circle {
+  cursor: pointer;
+  transition:
+    fill-opacity 0.3s ease,
+    transform 0.3s ease;
+}
+circle:hover {
+  fill-opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* Testo delle emozioni */
+text {
+  font-family: 'Arial', sans-serif;
+  font-size: 20px;
+  fill: var(--primary-color);
+  font-weight: bold;
+}
+
+/* Tooltip */
+.tooltip {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: 1000;
+  transition:
+    opacity 0.3s ease-in-out,
+    transform 0.2s ease-in-out;
+}
+.tooltip.visible {
+  opacity: 1;
+  transform: translateY(-5px);
+}
+
+/* Media Query per mobile */
+@media (max-width: 768px) {
+  .emotion-title {
+    font-size: 20px;
+  }
+
+  /* Se vuoi ridurre ancora l’SVG su mobile */
+  svg {
+    /* height: 90vh;  // Esempio se vuoi occupare quasi tutto lo schermo */
+  }
+
+  text {
+    font-size: 16px; /* Rimpicciolisci il testo se serve */
+  }
+}

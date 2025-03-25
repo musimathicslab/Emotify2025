@@ -1,0 +1,97 @@
+<div class="context-container">
+  <!-- Stepper -->
+  <div class="custom-steps">
+    <p-steps
+      [model]="steps"
+      [activeIndex]="currentStep"
+      [readonly]="false"
+      (activeIndexChange)="handleStepSelection($event)">
+    </p-steps>
+  </div>
+
+  <!-- Passo 1: Login Last.fm -->
+  <div *ngIf="currentStep === 0">
+    <ng-container *ngIf="isMobile; else webLogin">
+      <app-mobile-login (onLoginSuccess)="goToNextStep()"></app-mobile-login>
+    </ng-container>
+    <ng-template #webLogin>
+      <app-lastfm-login (onLoginSuccess)="goToNextStep()"></app-lastfm-login>
+    </ng-template>
+  </div>
+
+  <!-- Passo 2: Login Spotify -->
+  <div *ngIf="currentStep === 1">
+    <app-spotify-login (onLoginSuccess)="goToNextStep()"></app-spotify-login>
+  </div>
+
+  <!-- Passo 3: Selezione del luogo -->
+  <div *ngIf="currentStep === 2">
+    <h2 class="question-title">Dove ti trovi?</h2>
+    <div class="card-row">
+      <div
+        class="card-container"
+        *ngFor="let location of locations"
+        (click)="selectLocation(location.value)">
+        <p-card
+          [styleClass]="selectedLocation === location.value ? 'selected' : ''"
+          header="{{ location.label }}"
+          [style]="{ textAlign: 'center', width: '180px' }">
+          <img
+            [src]="location.image"
+            alt="{{ location.label }}"
+            class="option-image"
+            (error)="onImageError($event)" />
+        </p-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Passo 4: Selezione dell'attività -->
+  <div *ngIf="currentStep === 3">
+    <h2 class="question-title">Cosa stai facendo?</h2>
+    <div class="card-row">
+      <div
+        class="card-container"
+        *ngFor="let activity of filteredActivities"
+        (click)="selectActivity(activity.value)">
+        <p-card
+          [styleClass]="selectedActivity === activity.value ? 'selected' : ''"
+          header="{{ activity.label }}"
+          [style]="{ textAlign: 'center', width: '180px' }">
+          <img
+            [src]="activity.image"
+            alt="{{ activity.label }}"
+            class="option-image"
+            (error)="onImageError($event)" />
+        </p-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Passo 5: Mappa delle emozioni -->
+  <div *ngIf="currentStep === 4">
+    <app-emotion-map
+      (onEmotionClick)="handleEmotionSelected($event)"></app-emotion-map>
+  </div>
+
+  <!-- Passo 6: Grafico delle emozioni -->
+  <div *ngIf="currentStep === 5">
+    <h2 class="question-title">Seleziona l’intensità dell’emozione scelta:</h2>
+    <div class="graph-container">
+      <app-emotion-graph
+        [emotion]="selectedEmotion"
+        (onEmotionClick)="handleEmotionLevelSelected($event)">
+      </app-emotion-graph>
+    </div>
+  </div>
+
+  <!-- Passo 7: Player Spotify -->
+  <div *ngIf="currentStep === 6">
+    <app-player
+      [selectedEmotion]="selectedEmotion"
+      [selectedActivity]="selectedActivity"
+      [selectedLocation]="selectedLocation"
+      [selectedEmotionLevel]="selectedEmotionLevel">
+    </app-player>
+  </div>
+</div>

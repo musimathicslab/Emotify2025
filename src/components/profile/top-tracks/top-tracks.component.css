@@ -1,0 +1,152 @@
+.top-tracks-card {
+  width: 100%;
+  max-width: 500px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.track-img {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+}
+
+.track-info {
+  flex-grow: 1;
+}
+.top-tracks-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.header-icon {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+}
+
+.podium {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end; /* Allinea tutti i podi in basso */
+  gap: 20px;
+  margin-top: 40px;
+  position: relative;
+  padding: 20px 0;
+}
+
+.podium-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.track-card {
+  width: 110px;
+  padding: 20px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+.track-card:hover {
+  transform: translateY(-5px);
+}
+
+.first .track-card {
+  background-color: gold;
+  height: 200px;
+}
+
+.second .track-card {
+  background-color: silver;
+  height: 180px;
+}
+
+.third .track-card {
+  background-color: #cd7f32;
+  height: 160px;
+}
+
+/* Posizionamento delle medaglie sopra il podio */
+.medal-icon {
+  width: 45px;
+  height: 45px;
+  position: absolute;
+  top: -30px; /* Più vicino al podio */
+  z-index: 10;
+}
+
+.track-img {
+  width: 55px;
+  height: 55px;
+  margin: 10px 0;
+}
+
+.track-info {
+  font-size: 14px;
+  color: black;
+  font-weight: bold;
+  text-align: center;
+}
+
+.track-info span {
+  font-weight: normal;
+  display: block;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.7);
+}
+@media (max-width: 768px) {
+  /* Mantieni i 3 blocchi in riga, ma riduci gap e dimensioni */
+  .podium {
+    gap: 10px; /* meno spazio orizzontale */
+    margin-top: 20px; /* se vuoi meno spazio sopra */
+  }
+
+  /* Card più piccole */
+  .track-card {
+    width: 100px; /* card più stretta */
+    padding: 10px; /* meno padding */
+    border-radius: 10px; /* puoi anche ridurre il border-radius */
+  }
+
+  /* Riduci la dimensione dell’immagine */
+  .track-img {
+    width: 40px;
+    height: 40px;
+    margin: 5px 0;
+  }
+
+  /* Riduci il font all’interno */
+  .track-info {
+    font-size: 12px;
+  }
+
+  /* Rimuovi o riduci l’altezza fissa sulle classi first, second, third */
+  .first .track-card {
+    background-color: gold;
+    height: auto; /* lascia che si adatti al contenuto */
+  }
+  .second .track-card {
+    background-color: silver;
+    height: auto;
+  }
+  .third .track-card {
+    background-color: #cd7f32;
+    height: auto;
+  }
+}
