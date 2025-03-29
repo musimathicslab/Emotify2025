@@ -50,10 +50,10 @@ export class RatingComponent implements OnInit {
   formGroup!: FormGroup;
   parameters = [
     { label: 'Tempo', value: 50 },
+    { label: 'Loudness', value: 50 },
     { label: 'Danceability', value: 50 },
     { label: 'Instrumentalness', value: 50 },
     { label: 'Speechiness', value: 50 },
-    { label: 'Loudness', value: 50 },
   ];
   emotions: { code: number; name: string; img: string }[] = [];
   activeParameterIndex: number = 0;
@@ -178,5 +178,25 @@ export class RatingComponent implements OnInit {
 
   getFormGroup(control: AbstractControl): FormGroup {
     return control as FormGroup;
+  }
+
+  shouldShowParameter(index: number): boolean {
+    // Valore di Instrumentalness (assumendo sia il 3° slider, index=2)
+    const instrumentalnessValue =
+      this.parameterControls.at(3).get('value')?.value ?? 0;
+
+    if (index != 4) {
+      return true;
+    }
+
+    // Altri parametri (1,3,4) li mostriamo solo se Instrumentalness > 50
+    return instrumentalnessValue > 50;
+  }
+
+  // Filtro gli indici che sono “visibili”
+  filteredIndexes(): number[] {
+    return this.parameterControls.controls
+      .map((_, i) => i)
+      .filter(i => this.shouldShowParameter(i));
   }
 }

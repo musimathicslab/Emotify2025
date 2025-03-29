@@ -13,6 +13,7 @@ import {
   LOCATIONS,
   STEPS,
 } from '../../../constants/place.constants';
+
 import { Capacitor } from '@capacitor/core';
 import { MobileLoginComponent } from '../../login/mobile-login-lastfm/mobile-login-lastfm.component';
 import { LastfmLoginComponent } from '../../login/lastfm-login/lastfm-login.component';
@@ -181,5 +182,43 @@ export class ContextSelectorComponent implements OnInit {
   onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
     target.src = 'img/image.png';
+  }
+
+  mapLocation(location: string | null): number {
+    const mapping: { [key: string]: number } = {
+      casa: 1,
+      ufficio: 2,
+      scuola: 3,
+      palestra: 4,
+      parco: 5,
+      viaggio: 6,
+    };
+    return location && mapping[location] ? mapping[location] : 0;
+  }
+  mapEmotion(emotion: string | null): number {
+    const mapping: { [key: string]: number } = {
+      tristezza: 0,
+      rabbia: 1,
+      felicità: 2,
+      paura: 3,
+      disgusto: 4,
+    };
+    return emotion ? (mapping[emotion.toLowerCase()] ?? 0) : 0;
+  }
+
+  mapActivity(activity: string | null): number {
+    const mapping: { [key: string]: number } = {
+      lavorando: 1,
+      studiando: 2,
+      rilassando: 3,
+      allenandoti: 4,
+      leggendo: 5,
+      giocando: 6,
+      meditando: 7,
+      cucinando: 8,
+      fotografando: 9,
+      Panorami: 10,
+    };
+    return activity && mapping[activity] ? mapping[activity] : 0;
   }
 }

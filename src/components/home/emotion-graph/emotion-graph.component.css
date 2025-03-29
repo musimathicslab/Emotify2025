@@ -1,30 +1,108 @@
-div#graphContainer {
+/* emotion-graph.component.css */
+
+/* Contenitore principale del grafico */
+.graph-container {
   position: relative;
-  width: 100%;
-  max-width: 800px;
-  height: 400px;
-  margin: 0 auto; /* Centra il grafico */
+  width: 100%; /* Occupa tutta la larghezza del contenitore padre */
+  margin: 0 auto;
   background: white;
   overflow-x: auto; /* Abilita lo scroll orizzontale */
-  overflow-y: hidden;
-  white-space: nowrap; /* Evita il wrapping del contenuto */
+  overflow-y: hidden; /* Nasconde lo scroll verticale */
+  white-space: nowrap; /* Evita che il contenuto vada a capo */
+  /* Nessuna height fissa: lasciamo adattare l'altezza */
 }
 
-svg {
-  position: relative; /* Puoi mantenere absolute se necessario, ma in questo caso relative aiuterà a non staccare dal flusso */
-  min-width: 800px; /* Imposta la larghezza minima pari al grafico */
+/* L'SVG avrà una larghezza minima più grande di 100% per forzare lo scroll orizzontale se lo schermo è stretto */
+.graph-container svg {
+  display: block; /* Evita spazi indesiderati */
+  min-width: 1200px; /* Larghezza minima */
+  height: 400px; /* Altezza fissa (se la vuoi a 400px) */
+  margin: 0; /* Rimuove padding extra */
   overflow: visible;
-  z-index: 1;
 }
 
+/* Su schermi <= 768px puoi ridurre l'altezza (o la larghezza minima) */
+@media (max-width: 768px) {
+  .graph-container svg {
+    min-width: 900px; /* ad esempio, più piccola su mobile */
+    height: 300px; /* riduci altezza su mobile */
+  }
+}
+
+/* Miniatura (overview) - se vuoi mantenerla */
+.overview-container {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  margin-top: 8px;
+  background: #f0f0f0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+/* Nascondi la overview su desktop, mostrala su mobile */
+@media (min-width: 769px) {
+  .overview-container {
+    display: none;
+  }
+}
+
+/* Stili di base per path, text, hover, ecc. */
 path {
   transition: all 0.3s ease;
 }
-
 path:hover {
   opacity: 0.9;
 }
+text {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  fill: #000;
+  font-weight: bold;
+}
+.graph-container {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+  overflow-x: auto; /* Scroll orizzontale */
+  overflow-y: hidden; /* Niente scroll verticale */
+  white-space: nowrap;
+}
 
+/* L'SVG principale, largo 1200 e alto 400 */
+.graph-container svg {
+  display: block;
+  min-width: 1200px; /* forza scroll orizzontale se schermo < 1200px */
+  height: 400px;
+  margin: 0;
+  overflow: visible;
+}
+
+/* La overview è sempre presente nel DOM, ma la nascondiamo su schermi >= 769px */
+.overview-container {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  margin-top: 8px;
+  background: #f0f0f0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+@media (min-width: 769px) {
+  .overview-container {
+    display: none;
+  }
+}
+
+/* Stili di base */
+path {
+  transition: all 0.3s ease;
+}
+path:hover {
+  opacity: 0.9;
+}
 text {
   font-family: Arial, sans-serif;
   font-size: 12px;
@@ -32,9 +110,8 @@ text {
   font-weight: bold;
 }
 
-/* Mobile: se vuoi anche ridurre l'altezza */
-@media (max-width: 768px) {
-  div#graphContainer {
-    height: 300px; /* Riduci l'altezza su mobile */
+@media (min-width: 769px) {
+  .overview-container {
+    display: none;
   }
 }

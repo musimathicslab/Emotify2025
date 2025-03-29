@@ -1,18 +1,16 @@
-import { LastFmService } from '../services/lastfm.service';
 import { TrackRating } from './track-rating';
 import { NeuralModelService } from '../services/neural-model.service';
-import { MemoryStore } from './memory-store';
-
+import { MemoryStore } from './ memory-store';
 
 export class MemoryModelImpl {
   // Esposto pubblicamente lo store per permettere l'accesso diretto
   public memoryStore: MemoryStore;
   private modelService: NeuralModelService;
 
-  constructor(private lastFmService: LastFmService) {
+  constructor() {
     // Inizializza lo store e il modello
     this.memoryStore = new MemoryStore('memoryModel');
-    this.modelService = new NeuralModelService();
+    this.modelService = new NeuralModelService(9);
   }
 
   /**
@@ -25,7 +23,6 @@ export class MemoryModelImpl {
     emotionLevel: number,
     activity: number,
     location: number,
-    rating: number,
     tags: string[], // custom tags (calcolati internamente)
     tempo: number,
     danceability: number,
@@ -45,7 +42,6 @@ export class MemoryModelImpl {
       emotionLevel,
       activity,
       location,
-      rating,
       allTags, // Usa l'unione dei tag
       tempo,
       danceability,
@@ -61,17 +57,21 @@ export class MemoryModelImpl {
   public async trainModel(
     context: number[],
     targetFeatures: number[],
-    rating: number
+    targetEmotion: number[]
   ): Promise<void> {
     console.log(
       'TrainModel => context:',
       context,
       'features:',
       targetFeatures,
-      'rating:',
-      rating
+      'emotion:',
+      targetEmotion
     );
-    await this.modelService.trainSingleSample(context, targetFeatures, rating);
+    await this.modelService.trainSingleSample(
+      context,
+      targetFeatures,
+      targetEmotion
+    );
   }
 
   /**
@@ -179,6 +179,6 @@ export class MemoryModelImpl {
    * Carica il modello neurale da storage locale.
    */
   public async loadModelFromLocal(): Promise<void> {
-    this.modelService = await NeuralModelService.loadModel('my-tf-model');
+    this.modelService = await NeuralModelService.loadModel(9, 'my-tf-model');
   }
 }

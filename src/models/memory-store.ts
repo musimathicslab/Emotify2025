@@ -1,3 +1,4 @@
+// MemoryStore.ts
 import { Preferences } from '@capacitor/preferences';
 import { TrackRating } from './track-rating';
 
@@ -30,6 +31,8 @@ export class MemoryStore {
         const data = parsed.data || parsed;
         this.memory = new Map(data);
         console.log('✅ Memoria caricata dalle Preferences:', this.memory);
+      } else {
+        console.log('Nessun dato salvato, memoria vuota.');
       }
     } catch (error) {
       console.error('Errore nel caricamento della memoria:', error);
@@ -100,7 +103,6 @@ export class MemoryStore {
     emotionLevel: number,
     activity: number,
     location: number,
-    rating: number,
     tags: string[],
     tempo: number,
     danceability: number,
@@ -115,13 +117,13 @@ export class MemoryStore {
       title: trackTitle.trim(),
       artist: artist.trim(),
       emotion: emotion.trim(),
+      realEmotion: emotion.trim(),
       emotionLevel,
       tempo,
       danceability,
       instrumentalness,
       speechiness,
       loudness,
-      rating,
       seedGenres: '',
       seedTracks: trackTitle.trim(),
       popularity: 0,
@@ -140,8 +142,7 @@ export class MemoryStore {
 
     const trackList = this.memory.get(key) || [];
     trackList.push(newTrack);
-    // Ordina per rating decrescente
-    trackList.sort((a, b) => b.rating - a.rating);
+    // Salva il nuovo array (potresti anche voler ordinare se hai un criterio specifico)
     this.memory.set(key, trackList);
 
     // Salva su Preferences (fire-and-forget)
@@ -149,9 +150,7 @@ export class MemoryStore {
       console.error('Errore nel salvataggio della memoria:', error)
     );
 
-    console.log(
-      `✅ Traccia aggiunta: ${trackTitle} - ${artist} (Rating: ${rating})`
-    );
+    console.log(`✅ Traccia aggiunta: ${trackTitle} - ${artist}`);
   }
 
   /**
@@ -192,6 +191,9 @@ export class MemoryStore {
     return moodCounts;
   }
 
+  /**
+   * Resetta la memoria, cancellando i dati salvati.
+   */
   public async reset(): Promise<void> {
     this.memory.clear();
     try {

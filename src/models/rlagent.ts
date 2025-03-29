@@ -7,12 +7,11 @@ export class RLAgent {
   private epsilon: number;
   private readonly epsilonDecay: number;
   private readonly minEpsilon: number;
-  private readonly gamma: number; // discount factor
+  private readonly gamma: number;
   private readonly actionSpaceSize: number;
   private bestLoss: number | null = null;
   private bestWeights: tf.Tensor[] | null = null;
 
-  // inputDim=9, actionSpaceSize ad esempio 10
   constructor(inputDim: number, actionSpaceSize: number) {
     this.actionSpaceSize = actionSpaceSize;
     this.optimizer = tf.train.adam(0.001);
@@ -63,9 +62,7 @@ export class RLAgent {
   public async trainStep(
     state: number[],
     action: number,
-    reward: number,
-    nextState: number[],
-    done: boolean
+    reward: number
   ): Promise<void> {
     const expectedDim = this.qNetwork.inputs[0].shape[1] as number;
     if (!state || state.length !== expectedDim) {
@@ -74,20 +71,9 @@ export class RLAgent {
       );
       return;
     }
-    if (!done && (!nextState || nextState.length !== expectedDim)) {
-      console.warn(
-        `trainStep: nextState non valido. Atteso ${expectedDim}, ottenuto ${nextState?.length}.`
-      );
-      return;
-    }
     const qValues = this.predict(state);
-    let target = reward;
-    if (!done) {
-      const nextQ = this.predict(nextState);
-      target = reward + this.gamma * Math.max(...nextQ);
-    }
     const targetQValues = [...qValues];
-    targetQValues[action] = target;
+    targetQValues[action] = reward;
 
     const xs = tf.tensor2d([state]);
     const ys = tf.tensor2d([targetQValues]);

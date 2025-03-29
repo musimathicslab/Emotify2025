@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { MemoryModelImpl } from '../models/memory-model';
-import { LastFmService } from './lastfm.service';
 import { MOOD_DATA, MoodInfo, Severity } from '../constants/emotions.constants';
 
 @Injectable({
@@ -10,9 +9,9 @@ export class EmotionsService {
   private memoryModel: MemoryModelImpl;
   private emotionNameMap: { [code: number]: string } = {};
 
-  constructor(private lastFmService: LastFmService) {
+  constructor() {
     // Inizializza il memory model
-    this.memoryModel = new MemoryModelImpl(this.lastFmService);
+    this.memoryModel = new MemoryModelImpl();
 
     // Attendi che la memoria sia pronta
     this.memoryModel.memoryStore.ready().then(() => {
@@ -169,12 +168,17 @@ export class EmotionsService {
     );
   }
 
+  // Metodo per ottenere le statistiche dei mood tramite MemoryStore
+  public getMoodStatistics(): { [mood: string]: number } {
+    return this.memoryModel.memoryStore.getMoodStatistics();
+  }
+
   public getFavoriteSongsByMoodLabel(): { [moodLabel: string]: string[] } {
     const tracks = this.memoryModel.getAllTracks();
     const songMap: { [moodLabel: string]: Map<string, number> } = {};
 
     tracks.forEach(track => {
-      if (track?.emotion != null && track?.rating !== undefined) {
+      if (track?.emotion != null) {
         const code = Number(track.emotion);
         const moodLabel = this.getEmotionName(code);
 
@@ -182,30 +186,24 @@ export class EmotionsService {
           songMap[moodLabel] = new Map<string, number>();
         }
 
+        // Qui salvi la canzone nel map
         const title = `${track.title || 'Titolo sconosciuto'} - ${
           track.artist || 'Artista sconosciuto'
         }`;
-
-        const existingRating = songMap[moodLabel].get(title) ?? 0;
-        if (track.rating > existingRating) {
-          songMap[moodLabel].set(title, track.rating);
-        }
+        const oldCount = songMap[moodLabel].get(title) || 0;
+        songMap[moodLabel].set(title, oldCount + 1);
       }
     });
 
+    // Ora costruisci il risultato finale
     const result: { [moodLabel: string]: string[] } = {};
     Object.keys(songMap).forEach(moodLabel => {
       result[moodLabel] = Array.from(songMap[moodLabel].entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(entry => entry[0]);
+        .sort((a, b) => b[1] - a[1]) // ordina discendente per conteggio
+        .slice(0, 3) // prendi le prime 3
+        .map(entry => entry[0]); // estrai solo il titolo
     });
 
     return result;
-  }
-
-  // Metodo per ottenere le statistiche dei mood tramite MemoryStore
-  public getMoodStatistics(): { [mood: string]: number } {
-    return this.memoryModel.memoryStore.getMoodStatistics();
   }
 }

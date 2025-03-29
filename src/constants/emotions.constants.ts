@@ -7,45 +7,46 @@ export type Severity =
   | 'contrast';
 
 export interface MoodInfo {
-  label: string; // Nome in italiano (es. "Triste")
+  label: string; // Nome in italiano (es. "Tristezza")
   image: string; // Icona rappresentativa
   severity: Severity; // Colore badge (da utilizzare per i tag)
 }
 
-// Definizione globale dei mood con label, immagine e colore
+/**
+ * Mappa i 5 mood ai colori (severity) più vicini possibili
+ * alle sfumature di emotionsMobile (solo come esempio).
+ * Puoi cambiare la severity a tuo piacimento:
+ *  - "danger" di solito è rosso
+ *  - "warn" di solito è giallo/arancio
+ *  - "success" di solito è verde
+ *  - "info" di solito è blu
+ *  - "secondary" spesso è grigio o viola
+ *  - "contrast" potrebbe essere nero/bianco (dipende dal tema)
+ */
 export const MOOD_DATA: Record<number, MoodInfo> = {
   0: {
-    label: 'Tristezza',
+    label: 'Tristezza', // colore in emotionsMobile: blu
     image: 'img/sad.png',
-    severity: 'success',
+    severity: 'info', // "info" è spesso blu/azzurro
   },
   1: {
-    label: 'Rabbia',
+    label: 'Rabbia', // colore in emotionsMobile: arancione/rosso
     image: 'img/angry.png',
-    severity: 'danger',
+    severity: 'danger', // "danger" è tipicamente rosso
   },
   2: {
-    label: 'Felicità',
+    label: 'Felicità', // colore in emotionsMobile: giallo
     image: 'img/happy.png',
-    severity: 'danger',
+    severity: 'warn', // "warn" è giallo/arancione
   },
   3: {
-    label: 'Paura',
+    label: 'Paura', // colore in emotionsMobile: viola
     image: 'img/scare.png',
-    severity: 'success',
+    severity: 'secondary', // "secondary" spesso è grigio o viola chiaro
   },
-
   4: {
-    label: 'Disgusto',
+    label: 'Disgusto', // colore in emotionsMobile: verde
     image: 'img/sick.png',
-    severity: 'info',
+    severity: 'success', // "success" è solitamente verde
   },
-};
-
-// Definizione delle fasce orarie di ascolto
-export const LISTENING_TIME_RANGES: { [key: string]: string } = {
-  'Mattina (6-10 AM)': '',
-  'Pomeriggio (11 AM - 4 PM)': '',
-  'Sera (5-9 PM)': '',
-  'Notte (10 PM - 5 AM)': '',
 };

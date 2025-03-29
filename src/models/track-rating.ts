@@ -4,7 +4,7 @@ export interface TrackRating {
   seedTracks: string;
   popularity: number;
   tags: string[];
-  rating: number;
+  realEmotion: string;
   title: string;
   artist: string;
   emotion: string;
@@ -17,7 +17,7 @@ export interface TrackRating {
   activity: string;
   location: string;
   audioFeatures: number[];
-  timestamp: string; // ✅ Aggiunto per supportare i momenti della giornata
+  timestamp: string;
 }
 
 export interface RatingParameter {

@@ -4,12 +4,15 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import * as d3 from 'd3';
 import { Preferences } from '@capacitor/preferences';
+import { NgIf } from '@angular/common';
+import { Capacitor } from '@capacitor/core';
 
 export const EMOTION_CONFIGURATIONS: { [key: string]: any[] } = {
   PAURA: [
@@ -419,145 +422,227 @@ const EMOTION_HIGHLIGHT_COLORS: { [key: string]: string } = {
   TRISTEZZA: 'rgba(33, 150, 243, 1)',
   FELICITÀ: 'rgba(255, 193, 7, 1)',
 };
+
 @Component({
   selector: 'app-emotion-graph',
-  template: `<div
-    #graphContainer
-    style="width:100%; height:500px; position: relative;"></div>`,
+  template: `
+    <!-- Grafico principale scrollabile -->
+    <div #mainContainer class="graph-container"></div>
+
+    <!-- Miniatura sempre presente (rimuoviamo *ngIf="isMobile") -->
+    <div #overviewContainer class="overview-container"></div>
+  `,
+  styleUrls: ['./emotion-graph.component.css'],
   standalone: true,
+  imports: [NgIf],
 })
-export class EmotionGraphComponent implements AfterViewInit {
-  @ViewChild('graphContainer', { static: true }) graphContainer!: ElementRef;
-  // Input: se non viene passato, lo leggeremo da Preferences
+export class EmotionGraphComponent implements AfterViewInit, OnChanges {
+  @ViewChild('mainContainer', { static: true })
+  mainContainer!: ElementRef<HTMLElement>;
+
+  @ViewChild('overviewContainer', { static: true })
+  overviewContainer!: ElementRef<HTMLElement>;
+
   @Input() emotion: string = '';
   @Output() onEmotionClick = new EventEmitter<{
     name: string;
     level: string;
   }>();
 
-  private svg!: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>;
-  private width = 0;
-  private height = 0;
-  private xScale!: d3.ScaleLinear<number, number>;
-  private yScale!: d3.ScaleLinear<number, number>;
+  // SVG "principale" e "overview"
+  private mainSvg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
+  private overviewSvg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
+
+  // Dimensioni del grafico principale
+  private mainWidth = 1200;
+  private mainHeight = 400;
+
+  // Dimensioni della miniatura
+  private overviewWidth = 300;
+  private overviewHeight = 80;
+
+  // Scale
+  private xScaleMain!: d3.ScaleLinear<number, number>;
+  private yScaleMain!: d3.ScaleLinear<number, number>;
+  private xScaleOverview!: d3.ScaleLinear<number, number>;
+  private yScaleOverview!: d3.ScaleLinear<number, number>;
 
   async ngAfterViewInit(): Promise<void> {
-    const pref = await Preferences.get({ key: 'selectedEmotion' });
-    this.emotion = pref.value ? pref.value.trim().toUpperCase() : 'PAURA';
-    this.createGraph();
+    // Per test, forziamo isMobile a true (oppure puoi eliminarlo se non serve)
+    // this.isMobile = Capacitor.isNativePlatform?.() || false;
+    // In questo esempio, non usiamo più isMobile per mostrare/nascondere la miniatura.
+
+    // Se non viene passato un @Input, carica l'emozione dalle Preferences
+    if (!this.emotion) {
+      const pref = await Preferences.get({ key: 'selectedEmotion' });
+      this.emotion = pref.value ? pref.value.trim().toUpperCase() : 'PAURA';
+    }
+
+    this.createMainGraph();
+    this.createOverviewGraph(); // Crea sempre la miniatura
   }
 
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
-    const pref = await Preferences.get({ key: 'selectedEmotion' });
-    this.emotion = pref.value ? pref.value.trim().toUpperCase() : 'PAURA';
-    this.createGraph();
+    if (changes['emotion'] && !changes['emotion'].firstChange) {
+      const pref = await Preferences.get({ key: 'selectedEmotion' });
+      this.emotion = pref.value
+        ? pref.value.trim().toUpperCase()
+        : this.emotion;
+
+      this.createMainGraph();
+      this.createOverviewGraph();
+    }
   }
 
-  private createGraph(): void {
-    if (!this.graphContainer) {
-      console.error('Graph container not found');
-      return;
-    }
-    const element = this.graphContainer.nativeElement;
-    d3.select(element).selectAll('*').remove(); // Pulisce il grafico precedente
+  private createMainGraph(): void {
+    if (!this.mainContainer?.nativeElement) return;
+
+    d3.select(this.mainContainer.nativeElement).selectAll('*').remove();
+
+    this.mainSvg = d3
+      .select<HTMLElement, unknown>(this.mainContainer.nativeElement)
+      .append<SVGSVGElement>('svg')
+      .attr('width', this.mainWidth)
+      .attr('height', this.mainHeight);
+
+    this.xScaleMain = d3
+      .scaleLinear()
+      .domain([0, 100])
+      .range([50, this.mainWidth - 50]);
+
+    this.yScaleMain = d3
+      .scaleLinear()
+      .domain([0, 100])
+      .range([this.mainHeight - 50, 50]);
+
+    this.drawAxes(
+      this.mainSvg,
+      this.xScaleMain,
+      this.yScaleMain,
+      this.mainWidth,
+      this.mainHeight,
+      true
+    );
 
     const levels = EMOTION_CONFIGURATIONS[this.emotion] || [];
-    if (levels.length === 0) {
-      console.warn(
-        `Nessuna configurazione trovata per l'emozione: ${this.emotion}`
+    levels.forEach(level => {
+      this.drawLevel(
+        this.mainSvg,
+        level,
+        this.xScaleMain,
+        this.yScaleMain,
+        true
       );
-    }
-    this.width = element.clientWidth || 800;
-    this.height = element.clientHeight || 500;
+    });
+  }
 
-    this.svg = d3
-      .select(element)
+  private createOverviewGraph(): void {
+    if (!this.overviewContainer?.nativeElement) return;
+
+    d3.select(this.overviewContainer.nativeElement).selectAll('*').remove();
+
+    this.overviewSvg = d3
+      .select<HTMLElement, unknown>(this.overviewContainer.nativeElement)
       .append<SVGSVGElement>('svg')
-      .attr('width', this.width)
-      .attr('height', this.height)
-      .style('background', 'rgba(255, 255, 255, 0.9)')
-      .style('border-radius', '8px') as unknown as d3.Selection<
-      SVGSVGElement,
-      unknown,
-      HTMLElement,
-      any
-    >;
+      .attr('width', this.overviewWidth)
+      .attr('height', this.overviewHeight)
+      .style('background', '#f9f9f9');
 
-    this.xScale = d3
+    this.xScaleOverview = d3
       .scaleLinear()
       .domain([0, 100])
-      .range([50, this.width - 50]);
-    this.yScale = d3
+      .range([0, this.overviewWidth]);
+
+    this.yScaleOverview = d3
       .scaleLinear()
       .domain([0, 100])
-      .range([this.height - 50, 50]);
+      .range([this.overviewHeight, 0]);
 
-    // Creazione degli assi
+    const levels = EMOTION_CONFIGURATIONS[this.emotion] || [];
+    levels.forEach(level => {
+      this.drawLevel(
+        this.overviewSvg,
+        level,
+        this.xScaleOverview,
+        this.yScaleOverview,
+        false
+      );
+    });
+  }
+
+  private drawAxes(
+    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>,
+    width: number,
+    height: number,
+    showLabels: boolean
+  ): void {
     const xAxis = d3
-      .axisBottom(this.xScale)
+      .axisBottom(xScale)
       .ticks(5)
       .tickSize(10)
       .tickPadding(10)
       .tickFormat(() => '');
-    this.svg
+    svg
       .append('g')
-      .attr('transform', `translate(0, ${this.height - 40})`)
+      .attr('transform', `translate(0, ${height - 40})`)
       .call(xAxis);
 
-    this.svg
-      .append('text')
-      .attr('x', 50)
-      .attr('y', this.height - 10)
-      .attr('fill', '#000')
-      .attr('text-anchor', 'start')
-      .style('font-size', '16px')
-      .style('font-weight', 'bold')
-      .text('Meno intenso');
-
-    this.svg
-      .append('text')
-      .attr('x', this.width - 50)
-      .attr('y', this.height - 10)
-      .attr('fill', '#000')
-      .attr('text-anchor', 'end')
-      .style('font-size', '16px')
-      .style('font-weight', 'bold')
-      .text('Più intenso');
-
     const yAxis = d3
-      .axisLeft(this.yScale)
+      .axisLeft(yScale)
       .ticks(5)
       .tickSize(0)
       .tickPadding(10)
       .tickFormat(() => '');
-    this.svg.append('g').attr('transform', `translate(50, 0)`).call(yAxis);
+    svg.append('g').attr('transform', `translate(50, 0)`).call(yAxis);
 
-    this.svg
-      .append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('x', -this.height / 2)
-      .attr('y', 20)
-      .attr('fill', '#000')
-      .attr('text-anchor', 'middle')
-      .style('font-size', '16px')
-      .style('font-weight', 'bold')
-      .text("Profondità dell'emozione");
+    if (showLabels) {
+      svg
+        .append('text')
+        .attr('x', 50)
+        .attr('y', height - 10)
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .text('Meno intenso');
 
-    levels.forEach(level => {
-      this.drawLevel(level);
-    });
+      svg
+        .append('text')
+        .attr('x', width - 50)
+        .attr('y', height - 10)
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .attr('text-anchor', 'end')
+        .text('Più intenso');
+
+      svg
+        .append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -height / 2)
+        .attr('y', 20)
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .attr('text-anchor', 'middle')
+        .text("Profondità dell'emozione");
+    }
   }
 
-  private drawLevel(level: any): void {
+  private drawLevel(
+    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+    level: any,
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>,
+    showTooltip: boolean
+  ): void {
     const dataPoints = level.topPoints.map((pt: { x: number; y: number }) => ({
-      x: this.xScale(pt.x),
-      y: this.yScale(pt.y),
+      x: xScale(pt.x),
+      y: yScale(pt.y),
     }));
 
     const areaGenerator = d3
       .area<{ x: number; y: number }>()
       .x(d => d.x)
-      .y0(this.yScale(0))
+      .y0(yScale(0))
       .y1(d => d.y)
       .curve(level.curve);
 
@@ -565,24 +650,36 @@ export class EmotionGraphComponent implements AfterViewInit {
     const highlightFill =
       EMOTION_HIGHLIGHT_COLORS[this.emotion] || 'rgba(0,0,255,1)';
 
+    const path = svg
+      .append<SVGPathElement>('path')
+      .datum(dataPoints)
+      .attr('fill', baseFill)
+      .attr('d', areaGenerator(dataPoints) ?? '');
+
+    if (!showTooltip) {
+      path.on('click', () => {
+        this.onEmotionClick.emit({ name: this.emotion, level: level.label });
+      });
+      return;
+    }
+
     const maxPoint = dataPoints.reduce(
       (prev: { x: number; y: number }, curr: { x: number; y: number }) =>
-        curr.y < prev.y ? curr : prev,
-      dataPoints[0]
+        curr.y < prev.y ? curr : prev
     );
 
-    const textElement = this.svg
-      .append('text')
+
+    const textElement = svg
+      .append<SVGTextElement>('text')
       .attr('x', maxPoint.x)
       .attr('y', maxPoint.y - 5)
-      .attr('fill', '#000')
-      .attr('text-anchor', 'middle')
       .style('font-size', '12px')
       .style('opacity', 0)
+      .attr('text-anchor', 'middle')
       .text(level.label);
 
-    const tooltip = d3
-      .select(this.graphContainer.nativeElement)
+    const container = d3.select(this.mainContainer.nativeElement);
+    const tooltip = container
       .append('div')
       .style('position', 'absolute')
       .style('background', 'rgba(0, 0, 0, 0.75)')
@@ -591,32 +688,30 @@ export class EmotionGraphComponent implements AfterViewInit {
       .style('border-radius', '6px')
       .style('font-size', '12px')
       .style('pointer-events', 'none')
-      .style('opacity', 0)
+      .style('opacity', '0')
       .style('transition', 'opacity 0.3s ease-in-out, transform 0.2s ease-out');
 
-    this.svg
-      .append('path')
-      .datum(dataPoints)
-      .attr('fill', baseFill)
-      .attr('d', areaGenerator(dataPoints))
+    path
       .attr('cursor', 'pointer')
-      .on('mouseover', function (event) {
-        d3.select(this).raise().attr('fill', highlightFill);
+      .on('mouseover', () => {
+        path.raise().attr('fill', highlightFill);
         textElement.transition().duration(200).style('opacity', 1);
       })
-      .on('mouseout', function (event) {
-        d3.select(this).attr('fill', baseFill);
+      .on('mouseout', () => {
+        path.attr('fill', baseFill);
         textElement.transition().duration(200).style('opacity', 0);
       })
-      .on('click', event => {
-        const [x, y] = d3.pointer(event, this.svg.node());
+      .on('click', (event: MouseEvent) => {
+        const [x, y] = d3.pointer(event, svg.node() as SVGSVGElement);
         tooltip
           .html(`<strong>${level.label}</strong>`)
           .style('left', `${x + 15}px`)
           .style('top', `${y - 25}px`)
-          .style('opacity', 1)
+          .style('opacity', '1')
           .style('transform', 'translateY(-5px)');
-        setTimeout(() => tooltip.style('opacity', 0), 2000);
+
+        setTimeout(() => tooltip.style('opacity', '0'), 2000);
+
         this.onEmotionClick.emit({ name: this.emotion, level: level.label });
       });
   }

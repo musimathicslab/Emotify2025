@@ -33,7 +33,6 @@ export class SpotifyLoginService {
   private tokenEndpoint = 'https://accounts.spotify.com/api/token';
   private scope =
     'ugc-image-upload user-read-email user-read-private user-read-recently-played user-top-read user-read-playback-position user-read-playback-state user-modify-playback-state user-read-currently-playing app-remote-control streaming playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-follow-read user-follow-modify user-library-read user-library-modify';
-  private apiUrl = 'https://api.spotify.com/v1';
 
   constructor(private http: HttpClient) {}
 

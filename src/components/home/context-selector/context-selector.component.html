@@ -88,9 +88,9 @@
   <!-- Passo 7: Player Spotify -->
   <div *ngIf="currentStep === 6">
     <app-player
-      [selectedEmotion]="selectedEmotion"
-      [selectedActivity]="selectedActivity"
-      [selectedLocation]="selectedLocation"
+      [selectedEmotion]="mapEmotion(selectedEmotion)"
+      [selectedActivity]="mapActivity(selectedActivity)"
+      [selectedLocation]="mapLocation(selectedLocation)"
       [selectedEmotionLevel]="selectedEmotionLevel">
     </app-player>
   </div>
