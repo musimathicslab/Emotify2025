@@ -319,6 +319,140 @@ export class SpotifyPlayerService {
     }
   }
 
+  /**
+   * Recupera le tracce dagli artisti preferiti dell'utente.
+   * Utilizza l’endpoint per i top artist e per ciascun artista richiede il suo top track.
+   */
+  async getTracksByFavoriteArtists(): Promise<
+    { title: string; artist: string }[]
+  > {
+    const token = await this.spotifyLoginService.getValidAccessToken();
+    if (!token) {
+      console.error('🚨 Token non disponibile per ottenere i top artist.');
+      return [];
+    }
+    // Recupera i top artist dell'utente
+    const artistsUrl = `https://api.spotify.com/v1/me/top/artists?limit=10`;
+    try {
+      const artistsResponse = await fetch(artistsUrl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const artistsData = await artistsResponse.json();
+      const favoriteArtists = artistsData.items; // array degli artisti preferiti
+      let tracks: { title: string; artist: string }[] = [];
+      // Per ogni artista, recupera i top tracks (le prime 10)
+      for (const artist of favoriteArtists) {
+        const artistId = artist.id;
+        const topTracksUrl = `https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=US`;
+        try {
+          const tracksResponse = await fetch(topTracksUrl, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          const tracksData = await tracksResponse.json();
+          if (tracksData.tracks && tracksData.tracks.length > 0) {
+            // Recupera le prime 10 tracce (o tutte quelle disponibili se meno di 10)
+            tracksData.tracks.slice(0, 10).forEach((track: any) => {
+              tracks.push({
+                title: track.name,
+                artist: track.artists.map((a: any) => a.name).join(', '),
+              });
+            });
+          }
+        } catch (error) {
+          console.error(
+            `Errore nel recuperare i top tracks per l'artista ${artist.name}:`,
+            error
+          );
+        }
+      }
+      return tracks;
+    } catch (error) {
+      console.error('Errore nel recuperare i top artist:', error);
+      return [];
+    }
+  }
+
+  public async getSpotifyTop50Playlist(): Promise<
+    { title: string; artist: string }[]
+  > {
+    const token = await this.spotifyLoginService.getValidAccessToken();
+    if (!token) {
+      console.error(
+        '🚨 Token non disponibile per ottenere la playlist Top 50 di Spotify.'
+      );
+      return [];
+    }
+    // Sostituisci con l'ID della playlist desiderata.
+    // Ad esempio, per "Top 50 Global" puoi usare: "37i9dQZEVXbMDoHDwVN2tF"
+    const playlistId = '37i9dQZEVXbMDoHDwVN2tF';
+    const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      // Mappa i risultati in un array di oggetti { title, artist }
+      return data.items.map((item: any) => {
+        const track = item.track;
+        return {
+          title: track.name,
+          artist: track.artists.map((artist: any) => artist.name).join(', '),
+        };
+      });
+    } catch (error) {
+      console.error(
+        'Errore nel recuperare la playlist Top 50 di Spotify:',
+        error
+      );
+      return [];
+    }
+  }
+
+  public async getUserLikedTracks(
+    limit: number = 50
+  ): Promise<{ title: string; artist: string }[]> {
+    const token = await this.spotifyLoginService.getValidAccessToken();
+    if (!token) {
+      console.error('🚨 Token non disponibile per ottenere le tracce salvate.');
+      return [];
+    }
+    const url = `https://api.spotify.com/v1/me/tracks?limit=${limit}`;
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      // Mappa la risposta per ritornare un array di oggetti { title, artist }
+      return data.items.map((item: any) => ({
+        title: item.track.name,
+        artist: item.track.artists.map((artist: any) => artist.name).join(', '),
+      }));
+    } catch (error) {
+      console.error(
+        'Errore nel recuperare le tracce salvate (liked tracks):',
+        error
+      );
+      return [];
+    }
+  }
+
   private async transferPlaybackToDevice() {
     if (!this.deviceId) {
       console.error(

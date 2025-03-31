@@ -362,6 +362,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     const currentEmotion = this.selectedEmotion;
     const currentCount = this.emotionTrainingCounts[currentEmotion] || 0;
 
+    // Se il training per l'emozione non è completo, usa le top tracks dell'utente
     if (currentCount < this.trainingLimit) {
       console.log(
         'Training in corso per emozione',
@@ -371,6 +372,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
       candidateTracks = await this.spotifyPlayerService.getUserTopTracks(50);
       console.log(candidateTracks);
     } else {
+      // Altrimenti, usa i tag predetti per cercare tracce candidate
       const predicted = this.tagClassifier.predictTag(
         this.currentAudioFeatures
       );
@@ -397,6 +399,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
         const candidate = await this.findTrackByTag(tag);
         if (candidate) candidateTracks.push(candidate);
       }
+      // Se non sono stati trovati candidati tramite i tag, usa le top tracks dell'utente
       if (candidateTracks.length === 0) {
         console.warn(
           'Nessun candidato trovato tramite tag. Uso top tracks Spotify.'
@@ -405,6 +408,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Rimuovo duplicati (ignorando le maiuscole)
     candidateTracks = candidateTracks.reduce(
       (unique, candidate) => {
         if (
@@ -420,19 +424,64 @@ export class PlayerComponent implements OnInit, OnDestroy {
     );
     console.log('Candidate tracks dopo rimozione duplicati:', candidateTracks);
 
-    const filteredCandidates = candidateTracks.filter(
+    // Filtro le tracce già riprodotte
+    let filteredCandidates = candidateTracks.filter(
       candidate => !this.recentlyPlayed.includes(candidate.title.toLowerCase())
     );
     console.log(
       'Candidate tracks dopo filtro tracce già riprodotte:',
       filteredCandidates
     );
+
+    // Definisci il numero minimo di tracce richiesto
+    const minRequiredTracks = 5;
+
+    // Fallback 1: Aggiungo le 50 tracce top dell'utente, se il numero di tracce è insufficiente
+    if (filteredCandidates.length < minRequiredTracks) {
+      console.warn(
+        "Fallback 1: poche tracce candidate trovate. Aggiungo le 50 tracce top dell'utente."
+      );
+      let fallback1 = await this.spotifyPlayerService.getUserTopTracks(50);
+      fallback1 = fallback1.filter(
+        candidate =>
+          !this.recentlyPlayed.includes(candidate.title.toLowerCase())
+      );
+      filteredCandidates = filteredCandidates.concat(fallback1);
+    }
+
+    // Fallback 2: Aggiungo le tracce che l'utente ha "messo il cuore" (liked tracks)
+    if (filteredCandidates.length < minRequiredTracks) {
+      console.warn(
+        'Fallback 2: tracce insufficienti. Aggiungo le tracce salvate (liked tracks).'
+      );
+      let fallback2 = await this.spotifyPlayerService.getUserLikedTracks(50);
+      fallback2 = fallback2.filter(
+        candidate =>
+          !this.recentlyPlayed.includes(candidate.title.toLowerCase())
+      );
+      filteredCandidates = filteredCandidates.concat(fallback2);
+    }
+
+    // Fallback 3: Aggiungo le tracce dalla playlist "Top 50 di Spotify", se ancora insufficienti
+    if (filteredCandidates.length < minRequiredTracks) {
+      console.warn(
+        'Fallback 3: tracce ancora insufficienti. Aggiungo tracce dalla playlist Top 50 di Spotify.'
+      );
+      let fallback3 = await this.spotifyPlayerService.getSpotifyTop50Playlist();
+      fallback3 = fallback3.filter(
+        candidate =>
+          !this.recentlyPlayed.includes(candidate.title.toLowerCase())
+      );
+      filteredCandidates = filteredCandidates.concat(fallback3);
+    }
+
     if (filteredCandidates.length === 0) {
       console.warn('Tutti i candidati sono già stati riprodotti recentemente.');
       return;
     }
     this.candidateTracks = filteredCandidates;
 
+    // Seleziono casualmente una traccia dalla lista finale
     const chosenCandidate = this.selectRandomCandidate(this.candidateTracks);
     const trackId = await lastValueFrom(
       this.spotifyPlayerService.searchTrack(
