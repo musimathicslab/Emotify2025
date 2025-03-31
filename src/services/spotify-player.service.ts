@@ -156,109 +156,6 @@ export class SpotifyPlayerService {
   }
 
   /**
-   * Trasferisce la riproduzione sul device del nostro Web Playback SDK.
-   */
-  private async transferPlaybackToDevice() {
-    if (!this.deviceId) {
-      console.error(
-        '🚨 Device ID non disponibile, impossibile trasferire la riproduzione.'
-      );
-      return;
-    }
-
-    // Ottengo un token valido PRIMA di chiamare l'API
-    this.spotifyLoginService.getValidAccessToken().subscribe(async token => {
-      if (!token) {
-        console.error(
-          '🚨 Errore: nessun token disponibile (o refresh fallito).'
-        );
-        return;
-      }
-
-      const url = 'https://api.spotify.com/v1/me/player';
-      try {
-        const response = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ device_ids: [this.deviceId], play: true }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('🚨 Errore nel trasferire la riproduzione:', errorData);
-        } else {
-          console.log('✅ Riproduzione trasferita con successo.');
-        }
-      } catch (error) {
-        console.error(
-          '🚨 Errore di rete nel trasferire la riproduzione:',
-          error
-        );
-      }
-    });
-  }
-
-  /**
-   * Riproduce una traccia specifica (usando l'ID di Spotify).
-   */
-  async playTrack(trackId: string) {
-    if (!this.deviceId) {
-      console.error('🚨 Errore: Nessun device ID disponibile.');
-      return;
-    }
-
-    // Controllo se il player è pronto
-    let state = await this.player?.getCurrentState();
-    if (!state) {
-      console.warn(
-        '⏳ Il player non è ancora pronto, ritento tra 2 secondi...'
-      );
-      await this.player.connect();
-      setTimeout(() => this.playTrack(trackId), 2000);
-      return;
-    }
-
-    // Otteniamo un token prima di fare la PUT
-    this.spotifyLoginService.getValidAccessToken().subscribe(async token => {
-      if (!token) {
-        console.error(
-          '🚨 Errore: nessun token disponibile (o refresh fallito).'
-        );
-        return;
-      }
-
-      const url = `https://api.spotify.com/v1/me/player/play?device_id=${this.deviceId}`;
-      const body = { uris: [`spotify:track:${trackId}`] };
-
-      try {
-        const response = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('🚨 Errore nel riprodurre la traccia:', errorData);
-        } else {
-          console.log('✅ Traccia avviata con successo:', trackId);
-        }
-      } catch (error) {
-        console.error(
-          '🚨 Errore di rete nella riproduzione della traccia:',
-          error
-        );
-      }
-    });
-  }
-
-  /**
    * Cerca una traccia per nome e artista.
    */
   searchTrack(
@@ -420,5 +317,114 @@ export class SpotifyPlayerService {
       console.error('Errore nel recuperare i top tracks:', error);
       return [];
     }
+  }
+
+  private async transferPlaybackToDevice() {
+    if (!this.deviceId) {
+      console.error(
+        '🚨 Device ID non disponibile, impossibile trasferire la riproduzione.'
+      );
+      return;
+    }
+
+    this.spotifyLoginService.getValidAccessToken().subscribe(async token => {
+      if (!token) {
+        console.error(
+          '🚨 Errore: nessun token disponibile (o refresh fallito).'
+        );
+        return;
+      }
+
+      const url = 'https://api.spotify.com/v1/me/player';
+      try {
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ device_ids: [this.deviceId], play: true }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('🚨 Errore nel trasferire la riproduzione:', errorData);
+          // Se lo status è 404, controlla il deviceId o l’accesso
+          if (response.status === 404) {
+            console.warn(
+              'Device non trovato. Verifica che il device ID sia corretto e che il player sia connesso.'
+            );
+          }
+        } else {
+          console.log('✅ Riproduzione trasferita con successo.');
+        }
+      } catch (error) {
+        console.error(
+          '🚨 Errore di rete nel trasferire la riproduzione:',
+          error
+        );
+      }
+    });
+  }
+
+  async playTrack(trackId: string) {
+    if (!this.deviceId) {
+      console.error('🚨 Errore: Nessun device ID disponibile.');
+      return;
+    }
+
+    // Controlla se il player è pronto
+    let state = await this.player?.getCurrentState();
+    if (!state) {
+      console.warn(
+        '⏳ Il player non è ancora pronto, ritento tra 2 secondi...'
+      );
+      await this.player.connect();
+      setTimeout(() => this.playTrack(trackId), 2000);
+      return;
+    }
+
+    this.spotifyLoginService.getValidAccessToken().subscribe(async token => {
+      if (!token) {
+        console.error(
+          '🚨 Errore: nessun token disponibile (o refresh fallito).'
+        );
+        return;
+      }
+
+      // Costruisci l'URL per il play
+      const url = `https://api.spotify.com/v1/me/player/play?device_id=${this.deviceId}`;
+      const body = { uris: [`spotify:track:${trackId}`] };
+
+      try {
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+          // Se ricevi 404, logga l'errore e prova eventualmente a riconnettere il player
+          const errorData = await response.json();
+          console.error('🚨 Errore nel riprodurre la traccia:', errorData);
+          // Se l'errore è 404, potresti voler forzare un refresh della connessione o notificare l’utente.
+          if (response.status === 404) {
+            console.warn(
+              'Il brano non è stato trovato. Verifica che il trackId sia corretto.'
+            );
+          }
+        } else {
+          console.log('✅ Traccia avviata con successo:', trackId);
+        }
+      } catch (error) {
+        console.error(
+          '🚨 Errore di rete nella riproduzione della traccia:',
+          error
+        );
+      }
+    });
   }
 }

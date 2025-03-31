@@ -10,10 +10,10 @@ export class EmotionsService {
   private emotionNameMap: { [code: number]: string } = {};
 
   constructor() {
-    // Inizializza il memory model
+    // Inizializza il memory model aggiornato (con reattività)
     this.memoryModel = new MemoryModelImpl();
 
-    // Attendi che la memoria sia pronta
+    // Attendi che la memoria sia pronta e logga le tracce iniziali
     this.memoryModel.memoryStore.ready().then(() => {
       console.log(
         '✅ Memoria pronta in EmotionsService:',
@@ -22,6 +22,11 @@ export class EmotionsService {
     });
 
     this.initializeEmotionNameMap();
+  }
+
+  // Se vuoi accedere in modo reattivo alle tracce, espone un getter:
+  public get tracks$() {
+    return this.memoryModel.tracks$;
   }
 
   private initializeEmotionNameMap(): void {
@@ -43,13 +48,6 @@ export class EmotionsService {
     }));
   }
 
-  public getEmotionNames(): { code: number; name: string }[] {
-    return Object.keys(MOOD_DATA).map(codeStr => {
-      const code = Number(codeStr);
-      return { code, name: MOOD_DATA[code].label };
-    });
-  }
-
   private getMoodInfo(code: number): MoodInfo {
     return (
       MOOD_DATA[code] || { label: `Mood ${code}`, image: '', severity: 'info' }
@@ -61,32 +59,11 @@ export class EmotionsService {
   }
 
   public getMoodLabel(input: number | string): string {
-    if (typeof input === 'string') {
-      return input;
-    } else {
-      return this.getMoodInfo(input).label;
-    }
-  }
-
-  public getMoodSeverity(input: number | string): Severity {
-    if (typeof input === 'string') {
-      const entry = Object.values(MOOD_DATA).find(m => m.label === input);
-      return entry ? entry.severity : 'info';
-    } else {
-      return this.getMoodInfo(input).severity;
-    }
-  }
-
-  public getMoodImage(input: number | string): string {
-    if (typeof input === 'string') {
-      const entry = Object.values(MOOD_DATA).find(m => m.label === input);
-      return entry ? entry.image : '';
-    } else {
-      return this.getMoodInfo(input).image;
-    }
+    return typeof input === 'string' ? input : this.getMoodInfo(input).label;
   }
 
   public getMoodFrequency(): { [moodLabel: string]: number } {
+    // Utilizza l'array aggiornato delle tracce
     const tracks = this.memoryModel.getAllTracks();
     console.log('📌 Tracce in memoria:', tracks);
     const moodCounts: { [moodLabel: string]: number } = {};
@@ -168,11 +145,6 @@ export class EmotionsService {
     );
   }
 
-  // Metodo per ottenere le statistiche dei mood tramite MemoryStore
-  public getMoodStatistics(): { [mood: string]: number } {
-    return this.memoryModel.memoryStore.getMoodStatistics();
-  }
-
   public getFavoriteSongsByMoodLabel(): { [moodLabel: string]: string[] } {
     const tracks = this.memoryModel.getAllTracks();
     const songMap: { [moodLabel: string]: Map<string, number> } = {};
@@ -199,9 +171,9 @@ export class EmotionsService {
     const result: { [moodLabel: string]: string[] } = {};
     Object.keys(songMap).forEach(moodLabel => {
       result[moodLabel] = Array.from(songMap[moodLabel].entries())
-        .sort((a, b) => b[1] - a[1]) // ordina discendente per conteggio
-        .slice(0, 3) // prendi le prime 3
-        .map(entry => entry[0]); // estrai solo il titolo
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(entry => entry[0]);
     });
 
     return result;

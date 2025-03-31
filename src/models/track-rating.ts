@@ -26,7 +26,6 @@ export interface RatingParameter {
 }
 
 export interface RatingsData {
-  selectedEmotion: string;
-  songRating: string;
+  selectedEmotion: number;
   parameterControls: RatingParameter[];
 }

@@ -10,7 +10,8 @@ import { Card } from 'primeng/card';
 import { MessagesModule } from 'primeng/messages';
 import { StyleClass } from 'primeng/styleclass';
 import { ProgressSpinner } from 'primeng/progressspinner';
-import { AsyncPipe, DecimalPipe, NgIf } from '@angular/common';
+import { AsyncPipe, DecimalPipe, LowerCasePipe, NgIf } from '@angular/common';
+import { Toast } from 'primeng/toast';
 
 // Servizi interni
 import { SpotifyPlayerService } from '../../../services/spotify-player.service';
@@ -19,7 +20,6 @@ import { MemoryModelImpl } from '../../../models/memory-model';
 import { RLAgent } from '../../../models/rlagent';
 import { RatingsData } from '../../../models/track-rating';
 import { MessageService } from 'primeng/api';
-import { Toast } from 'primeng/toast';
 import { Preferences } from '@capacitor/preferences';
 import { RatingComponent } from '../rating/rating.component';
 
@@ -40,6 +40,13 @@ import {
   VOCAB_TEMPO,
 } from '../../../constants/music-tags.constants';
 import { getTagForFeature } from '../../../constants/tag-mapper.util';
+import { EMOTION_CONFIGURATIONS } from '../emotion-graph/emotion-graph.component';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { App } from '@capacitor/app';
+
+interface PermissionStatus {
+  display: PermissionState; // "granted" | "denied" | "prompt"
+}
 
 @Component({
   selector: 'app-player',
@@ -60,6 +67,7 @@ import { getTagForFeature } from '../../../constants/tag-mapper.util';
     Toast,
     DecimalPipe,
     RatingComponent,
+    LowerCasePipe,
   ],
 })
 export class PlayerComponent implements OnInit, OnDestroy {
@@ -69,16 +77,21 @@ export class PlayerComponent implements OnInit, OnDestroy {
   albumCover$ = new BehaviorSubject<string>('');
   currentTime$ = new BehaviorSubject<string>('0:00');
   totalTime$ = new BehaviorSubject<string>('0:00');
-
   isPlayerReady$!: BehaviorSubject<boolean>;
   progress = 0;
   formGroup: FormGroup;
+  private isWarningShown = false; // Flag per prevenire messaggi di warning duplicati
 
-  // Buffer per evitare riproduzioni ripetute: massimo 30 brani
+  // Preferences: recently played e training progress
+  private recentlyPlayedKey = 'recentlyPlayedData';
+  // Se non vuoi che la lista venga resettata dopo 5 ore, aumenta questo valore oppure rimuovi il reset
+  private readonly RECENTLY_PLAYED_MAX_AGE = 5 * 60 * 60 * 1000;
   private recentlyPlayed: string[] = [];
   private isLoadingNewSong = false;
-  trainingCount = 0;
-  trainingLimit = 20;
+  private emotionTrainingCounts: { [emotion: number]: number } = {};
+  trainingLimit = 10; // Limite per ogni emozione
+
+  // Abilita/disabilita il rating (se il training è completato)
   enableRating = true;
 
   @Input() selectedEmotion = 0;
@@ -90,13 +103,14 @@ export class PlayerComponent implements OnInit, OnDestroy {
   private rlAgent: RLAgent;
   private destroy$ = new Subject<void>();
 
-  // Feature audio correnti: devono essere un array di 5 numeri
   currentAudioFeatures: number[] = [];
   private candidateTracks: { title: string; artist: string }[] = [];
-  // Stato dell'RLAgent (deve avere 9 elementi: 3 parametri di contesto, 1 emotionLevel e 5 feature)
   private lastState: number[] = [];
   private lastAction = 0;
+  // Flag per evitare lo skip automatico se la traccia non è stata valutata
   isTrackRated = false;
+
+  private isAppActive = true; // inizialmente l'app è in primo piano
 
   private tagVocabularyHelper = new TagVocabularyHelper();
   private storageKey = 'trainingCount';
@@ -109,7 +123,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     VOCAB_LOUD
   );
 
-  // src/constants/mappings.ts
+  // Mapping per location, emozione e attività
   mapLocation(location: string | null): number {
     const mapping: { [key: string]: number } = {
       casa: 1,
@@ -123,7 +137,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
       ? mapping[location.toLowerCase()]
       : 0;
   }
-
   mapEmotion(emotion: string | null): number {
     const mapping: { [key: string]: number } = {
       tristezza: 0,
@@ -134,7 +147,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
     };
     return emotion ? (mapping[emotion.toLowerCase()] ?? 0) : 0;
   }
-
   mapActivity(activity: string | null): number {
     const mapping: { [key: string]: number } = {
       lavorando: 1,
@@ -153,28 +165,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
       : 0;
   }
 
-  private async loadTrainingProgress(): Promise<void> {
-    try {
-      const result = await Preferences.get({ key: this.storageKey });
-      if (result.value !== null) {
-        this.trainingCount = parseInt(result.value, 10);
-      }
-    } catch (error) {
-      console.error('Errore nel caricamento del training progress:', error);
-    }
-  }
-
-  private async saveTrainingProgress(): Promise<void> {
-    try {
-      await Preferences.set({
-        key: this.storageKey,
-        value: this.trainingCount.toString(),
-      });
-    } catch (error) {
-      console.error('Errore nel salvataggio del training progress:', error);
-    }
-  }
-
   constructor(
     private spotifyPlayerService: SpotifyPlayerService,
     private fb: FormBuilder,
@@ -183,20 +173,52 @@ export class PlayerComponent implements OnInit, OnDestroy {
   ) {
     this.isPlayerReady$ = this.spotifyPlayerService.playerReady$;
     this.memoryModel = new MemoryModelImpl();
-    // L'RLAgent viene istanziato con inputDim=9
     this.rlAgent = new RLAgent(9, 10);
     this.formGroup = this.fb.group({ value: [0] });
   }
 
+  async requestNotificationPermission() {
+    const permission = await LocalNotifications.requestPermissions();
+    if (permission.display === 'granted') {
+      console.log('Notifiche autorizzate');
+    } else {
+      console.warn('Notifiche non autorizzate');
+    }
+  }
+
+  private async sendTrackRatingNotification(): Promise<void> {
+    if (!this.isAppActive) {
+      // controlla che l'app sia in background
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: new Date().getTime(),
+            title: 'Valutazione Richiesta 🎧',
+            body: 'Devi valutare la traccia prima di procedere alla successiva.',
+            sound: 'default',
+          },
+        ],
+      });
+    } else {
+      console.log('App in primo piano: nessuna notifica inviata.');
+    }
+  }
+
   async ngOnInit(): Promise<void> {
     await this.loadTrainingProgress();
-
-    // Aggiorna il vocabolario iniziale (opzionale)
+    await this.rlAgent.loadBestWeightsFromPreferences();
+    await this.tagVocabularyHelper.loadVocabulary();
+    await this.loadRecentlyPlayed();
+    await this.loadSelectedParameters();
+    await App.addListener('appStateChange', ({ isActive }) => {
+      this.isAppActive = isActive;
+      console.log('App active status:', this.isAppActive);
+    });
+    await this.requestNotificationPermission();
     [VOCAB_TEMPO, VOCAB_DANCE, VOCAB_INSTR, VOCAB_SPEECH, VOCAB_LOUD]
       .flat()
       .forEach(tag => this.tagVocabularyHelper.updateTagCounts([tag]));
 
-    // Sottoscrizioni per il player
     this.isPlaying$ = this.spotifyPlayerService.isPlaying$;
     this.trackTitle$ = this.spotifyPlayerService.trackTitle$;
     this.artistName$ = this.spotifyPlayerService.artistName$;
@@ -208,26 +230,33 @@ export class PlayerComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(trackId => {});
 
+    // Gestione del progresso della traccia
     this.spotifyPlayerService.progress$
       .pipe(takeUntil(this.destroy$))
       .subscribe(progress => {
         this.progress = progress;
         this.formGroup.patchValue({ value: progress }, { emitEvent: false });
-        if (
-          this.trainingCount < this.trainingLimit &&
-          progress >= 99 &&
-          !this.isTrackRated
-        ) {
-          console.warn('Traccia terminata, ma non valutata. Blocco autoplay.');
-          this.spotifyPlayerService.pause();
-          this.messageService.add({
-            severity: 'warn',
-            summary: 'Valutazione richiesta',
-            detail: "Devi valutare la traccia prima di riprodurne un'altra.",
-            life: 3000,
-          });
-        } else if (this.trainingCount >= this.trainingLimit && progress >= 99) {
-          this.playNextSongWithRL();
+
+        if (this.progress >= 99) {
+          if (!this.isTrackRated && !this.isWarningShown) {
+            console.warn(
+              'Traccia terminata, ma non valutata. Blocco autoplay.'
+            );
+            this.spotifyPlayerService.pause();
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Valutazione richiesta',
+              detail: "Devi valutare la traccia prima di riprodurne un'altra.",
+              life: 3000,
+            });
+            this.sendTrackRatingNotification();
+            this.isWarningShown = true; // Impedisce che vengano mostrati altri messaggi di warning
+          } else if (this.isTrackRated && !this.isWarningShown) {
+            this.isWarningShown = true; // Impedisce la ripetizione del messaggio
+            this.playNextSongWithRL();
+          }
+        } else {
+          this.isWarningShown = false; // Reset del flag quando si inizia una nuova traccia
         }
       });
 
@@ -236,6 +265,12 @@ export class PlayerComponent implements OnInit, OnDestroy {
       ?.valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe(value => {
         this.progress = value;
+      });
+
+    this.memoryModel.tracks$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(tracks => {
+        console.log('Memory tracks aggiornate:', tracks);
       });
   }
 
@@ -247,12 +282,10 @@ export class PlayerComponent implements OnInit, OnDestroy {
   togglePlay(): void {
     this.spotifyPlayerService.togglePlay();
   }
-
   previousTrack(): void {
     if (this.isLoadingNewSong) return;
     this.spotifyPlayerService.previousTrack();
   }
-
   nextTrack(): void {
     if (this.isLoadingNewSong) {
       this.messageService.add({
@@ -263,21 +296,28 @@ export class PlayerComponent implements OnInit, OnDestroy {
       });
       return;
     }
-    if (this.trainingCount < this.trainingLimit && !this.isTrackRated) {
+
+    if (!this.isTrackRated && !this.isWarningShown) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Valutazione richiesta',
         detail: 'Devi valutare la traccia prima di passare alla successiva.',
         life: 3000,
       });
+      this.sendTrackRatingNotification();
+      this.isWarningShown = true; // Impedisce il messaggio di warning duplicato
       return;
     }
-    if (this.trainingCount >= this.trainingLimit) {
+
+    if (this.currentTrainingCount >= this.trainingLimit) {
       this.isTrackRated = false;
+      this.isWarningShown = false; // Reset del flag per la nuova traccia
       this.playNextSongWithRL();
       return;
     }
+
     this.isTrackRated = false;
+    this.isWarningShown = false;
     this.spotifyPlayerService.nextTrack();
   }
 
@@ -285,9 +325,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     return this.spotifyPlayerService.currentTrackId$;
   }
 
-  /**
-   * Costruisce lo stato per l'RLAgent: [emotion, activity, location, emotionLevel, ...5 audio features]
-   */
+  // Costruisce lo stato per il RLAgent
   private buildRLState(
     emotion: number,
     activity: number,
@@ -297,11 +335,10 @@ export class PlayerComponent implements OnInit, OnDestroy {
   ): number[] {
     if (!features || features.length !== 5) {
       console.warn(
-        `buildRLState: features non validi. Attesi 5, ottenuti ${features ? features.length : 0}. Uso valori default.`
+        `buildRLState: features non validi. Attesi 5, ottenuti ${features ? features.length : 0}. Uso valori di default.`
       );
       features = [50, 50, 50, 50, 50];
     }
-    // Converte ogni elemento in numero per evitare che restino stringhe.
     const state = [
       Number(emotion),
       Number(activity),
@@ -313,19 +350,24 @@ export class PlayerComponent implements OnInit, OnDestroy {
     return state;
   }
 
-  /**
-   * Seleziona la prossima traccia tramite il processo RL.
-   */
+  // Avvia la riproduzione della prossima traccia tramite il RLAgent
   public async playNextSongWithRL(): Promise<void> {
-    // Assicura che le feature audio siano un array di 5 elementi
+    // Resetta il flag per il nuovo brano
+    this.isTrackRated = false;
     this.currentAudioFeatures = this.ensureAudioFeatures(
       this.currentAudioFeatures
     );
-
     let candidateTracks: { title: string; artist: string }[] = [];
 
-    if (this.trainingCount < this.trainingLimit) {
-      console.log('Training in corso: uso top tracks interne.');
+    const currentEmotion = this.selectedEmotion;
+    const currentCount = this.emotionTrainingCounts[currentEmotion] || 0;
+
+    if (currentCount < this.trainingLimit) {
+      console.log(
+        'Training in corso per emozione',
+        currentEmotion,
+        ': uso top tracks interne.'
+      );
       candidateTracks = await this.spotifyPlayerService.getUserTopTracks(50);
       console.log(candidateTracks);
     } else {
@@ -363,7 +405,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Rimuove duplicati
     candidateTracks = candidateTracks.reduce(
       (unique, candidate) => {
         if (
@@ -379,7 +420,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
     );
     console.log('Candidate tracks dopo rimozione duplicati:', candidateTracks);
 
-    // Filtra le tracce già riprodotte
     const filteredCandidates = candidateTracks.filter(
       candidate => !this.recentlyPlayed.includes(candidate.title.toLowerCase())
     );
@@ -393,7 +433,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
     }
     this.candidateTracks = filteredCandidates;
 
-    // Seleziona un candidato casualmente
     const chosenCandidate = this.selectRandomCandidate(this.candidateTracks);
     const trackId = await lastValueFrom(
       this.spotifyPlayerService.searchTrack(
@@ -409,12 +448,11 @@ export class PlayerComponent implements OnInit, OnDestroy {
     }
     this.isLoadingNewSong = false;
 
-    const { safeEmotion, safeActivity, safeLocation, safeEmotionLevel } =
-      this.getSafeContext();
+    const safeEmotionLevel = Number(this.selectedEmotionLevel);
     const state = this.buildRLState(
-      safeEmotion,
-      safeActivity,
-      safeLocation,
+      this.selectedEmotion,
+      this.selectedActivity,
+      this.selectedLocation,
       safeEmotionLevel,
       this.currentAudioFeatures
     );
@@ -422,6 +460,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     this.lastState = state;
   }
 
+  // Analizza i tag in memoria confrontandoli con quelli predetti
   private async analyzeCommonMemoryTags(
     predictedTags: string[],
     currentTitle: string,
@@ -457,13 +496,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
       .sort((a, b) => b[1] - a[1])
       .map(entry => entry[0]);
 
-    const defaultTags = new Set([
-      ...VOCAB_TEMPO,
-      ...VOCAB_DANCE,
-      ...VOCAB_INSTR,
-      ...VOCAB_SPEECH,
-      ...VOCAB_LOUD,
-    ]);
+    const defaultTags = new Set(['slow', 'vocal']);
     let commonTags = sortedTags.filter(tag => !defaultTags.has(tag));
     console.log('Tag comuni (esclusi default):', commonTags);
 
@@ -495,14 +528,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     return topTags;
   }
 
-  private updateRecentlyPlayed(title: string): void {
-    const titleLower = title.toLowerCase();
-    if (!this.recentlyPlayed.includes(titleLower)) {
-      this.recentlyPlayed.push(titleLower);
-      if (this.recentlyPlayed.length > 30) this.recentlyPlayed.shift();
-    }
-  }
-
+  // Ricerca una traccia tramite tag
   private async findTrackByTag(
     tag: string
   ): Promise<{ title: string; artist: string } | null> {
@@ -542,6 +568,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Gestisce il rating della traccia
   async handleRatings(ratings: RatingsData): Promise<void> {
     if (this.isLoadingNewSong) {
       this.messageService.add({
@@ -555,6 +582,9 @@ export class PlayerComponent implements OnInit, OnDestroy {
     }
     this.isLoadingNewSong = true;
     console.log('Valutazioni ricevute:', ratings);
+
+    // Imposta il flag per indicare che la traccia è stata valutata
+    this.isTrackRated = true;
 
     const currentTrackTitle = this.spotifyPlayerService.getCurrentTrackTitle();
     const currentArtist = this.spotifyPlayerService.getCurrentArtist();
@@ -580,7 +610,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
         ratings.parameterControls.find(p => p.label === 'Loudness')?.value ||
         50;
 
-      // Assicura che le feature siano 5 elementi
       this.currentAudioFeatures = this.ensureAudioFeatures([
         tempo,
         danceability,
@@ -653,21 +682,20 @@ export class PlayerComponent implements OnInit, OnDestroy {
         customTags
       );
 
-      // Costruisci lo stato completo (9 elementi) per il training
-      const { safeEmotion, safeActivity, safeLocation, safeEmotionLevel } =
-        this.getSafeContext();
+      const safeEmotionLevel = Number(this.selectedEmotionLevel);
+
+      // Ora costruisci lo stato passando safeEmotionLevel come numero
       const fullContext = this.buildRLState(
-        safeEmotion,
-        safeActivity,
-        safeLocation,
+        this.selectedEmotion,
+        this.selectedActivity,
+        this.selectedLocation,
         safeEmotionLevel,
         this.currentAudioFeatures
       );
+      const targetEmotion = [...[0, 0, 0, 0, 0]]; // Spread operator per creare un nuovo array mutabile
+      targetEmotion[Number(ratings.selectedEmotion)] = 1;
 
-      const targetEmotion = [0, 0, 0, 0, 0];
-      targetEmotion[this.selectedEmotion] = 1;
-
-      // Utilizza fullContext (con 9 elementi) invece del contesto parziale
+      // Esegue il training sul modello e sul classificatore
       await this.memoryModel.trainModel(
         fullContext,
         this.currentAudioFeatures,
@@ -702,71 +730,63 @@ export class PlayerComponent implements OnInit, OnDestroy {
         );
       }
 
-      // Se lo stato precedente non è già impostato correttamente, inizializzalo
       if (!this.lastState || this.lastState.length !== 9) {
         this.lastState = this.buildRLState(
-          safeEmotion,
-          safeActivity,
-          safeLocation,
+          this.selectedEmotion,
+          this.selectedActivity,
+          this.selectedLocation,
           safeEmotionLevel,
           this.currentAudioFeatures
         );
       }
       const nextState = this.buildRLState(
-        safeEmotion,
-        safeActivity,
-        safeLocation,
+        this.selectedEmotion,
+        this.selectedActivity,
+        this.selectedLocation,
         safeEmotionLevel,
         this.currentAudioFeatures
       );
 
-      // Calcola il reward basato sulla similarità coseno
-      const cosineSimilarity = (v1: number[], v2: number[]): number => {
-        const dot = v1.reduce((sum, val, i) => sum + val * v2[i], 0);
-        const mag1 = Math.sqrt(v1.reduce((sum, val) => sum + val * val, 0));
-        const mag2 = Math.sqrt(v2.reduce((sum, val) => sum + val * val, 0));
-        if (mag1 === 0 || mag2 === 0) return 0;
-        return dot / (mag1 * mag2);
-      };
-      const targetAudioFeatures = [
-        tempo,
-        danceability,
-        instrumentalness,
-        speechiness,
-        loudness,
-      ];
-      const reward = cosineSimilarity(
-        this.currentAudioFeatures,
-        targetAudioFeatures
-      );
+      let reward = this.selectedEmotion === ratings.selectedEmotion ? 1 : 0;
+
       console.log('Reward calcolato (similarità coseno):', reward);
 
       await this.rlAgent.trainStep(this.lastState, this.lastAction, reward);
       console.log('RLAgent trainStep completato');
 
       await this.rlAgent.saveBestWeightsToPreferences();
+
       this.lastState = nextState;
 
-      this.trainingCount++;
-      await this.saveTrainingProgress();
+      // Aggiorna il contatore di training per l'emozione corrente
+      let currentEmotion = Number(this.selectedEmotion);
+      if (isNaN(currentEmotion)) {
+        console.error(
+          'selectedEmotion non è un numero valido. Imposto il default a 0.'
+        );
+        currentEmotion = 0;
+      }
+      this.emotionTrainingCounts[currentEmotion] =
+        (this.emotionTrainingCounts[currentEmotion] || 0) + 1;
       console.log(
-        `Training Count: ${this.trainingCount}/${this.trainingLimit}`
+        `Training Count per emozione ${currentEmotion}: ${this.emotionTrainingCounts[currentEmotion]}`
       );
 
-      if (this.trainingCount >= this.trainingLimit) {
-        console.log(
-          'Il modello è stato addestrato. Disabilitiamo la valutazione.'
-        );
+      if (this.emotionTrainingCounts[currentEmotion] >= this.trainingLimit) {
         this.enableRating = false;
         this.messageService.add({
           severity: 'success',
-          summary: 'Addestramento Completato',
+          summary: 'Addestramento Completato per questa emozione',
           detail:
-            'Il modello ha appreso dalle canzoni! Ora userà il suo apprendimento per consigliarti brani automaticamente.',
+            "Il modello ha appreso sufficientemente per l'emozione corrente.",
           life: 5000,
         });
       }
 
+      await this.saveTrainingProgress();
+      console.log(`Training Count persistente:`, this.emotionTrainingCounts);
+
+      // Dopo un breve delay, avvia la prossima traccia
       setTimeout(() => {
         this.playNextSongWithRL();
       }, 2000);
@@ -776,6 +796,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Garantisce che l'array di audio features abbia 5 elementi
   private ensureAudioFeatures(features: number[]): number[] {
     if (!features || features.length !== 5) {
       console.warn(
@@ -786,29 +807,214 @@ export class PlayerComponent implements OnInit, OnDestroy {
     return features;
   }
 
-  private getSafeContext(): {
-    safeEmotion: number;
-    safeActivity: number;
-    safeLocation: number;
-    safeEmotionLevel: number;
-  } {
-    const safeEmotion = this.mapEmotion(
-      this.selectedEmotion ? String(this.selectedEmotion) : null
-    );
-    const safeActivity = this.mapActivity(
-      this.selectedActivity ? String(this.selectedActivity) : null
-    );
-    const safeLocation = this.mapLocation(
-      this.selectedLocation ? String(this.selectedLocation) : null
-    );
-    const safeEmotionLevel = parseFloat(this.selectedEmotionLevel) || 0;
-    return { safeEmotion, safeActivity, safeLocation, safeEmotionLevel };
-  }
-
+  // Seleziona casualmente una traccia candidata
   private selectRandomCandidate(
     candidates: { title: string; artist: string }[]
   ): { title: string; artist: string } {
     const randomIndex = Math.floor(Math.random() * candidates.length);
     return candidates[randomIndex];
+  }
+
+  get currentTrainingCount(): number {
+    return this.emotionTrainingCounts[this.selectedEmotion] || 0;
+  }
+
+  // Carica il progresso del training dalle Preferences
+  private async loadTrainingProgress(): Promise<void> {
+    try {
+      const result = await Preferences.get({ key: this.storageKey });
+      if (result.value !== null) {
+        this.emotionTrainingCounts = JSON.parse(result.value);
+        console.log('Training progress caricato:', this.emotionTrainingCounts);
+      } else {
+        console.log('Nessun training progress salvato trovato.');
+      }
+    } catch (error) {
+      console.error('Errore nel caricamento del training progress:', error);
+    }
+  }
+
+  // Salva il progresso del training nelle Preferences
+  private async saveTrainingProgress(): Promise<void> {
+    try {
+      await Preferences.set({
+        key: this.storageKey,
+        value: JSON.stringify(this.emotionTrainingCounts),
+      });
+      console.log('Training progress salvato:', this.emotionTrainingCounts);
+    } catch (error) {
+      console.error('Errore nel salvataggio del training progress:', error);
+    }
+  }
+
+  // Aggiorna la lista delle tracce già riprodotte
+  private updateRecentlyPlayed(title: string): void {
+    const titleLower = title.toLowerCase();
+    if (!this.recentlyPlayed.includes(titleLower)) {
+      this.recentlyPlayed.push(titleLower);
+      if (this.recentlyPlayed.length > 30) {
+        this.recentlyPlayed.shift();
+      }
+      this.saveRecentlyPlayed();
+    }
+  }
+  private async saveRecentlyPlayed(): Promise<void> {
+    try {
+      const dataToStore = {
+        list: this.recentlyPlayed,
+        timestamp: Date.now(),
+      };
+      await Preferences.set({
+        key: this.recentlyPlayedKey,
+        value: JSON.stringify(dataToStore),
+      });
+      console.log('✅ Lista recentlyPlayed salvata:', dataToStore);
+    } catch (error) {
+      console.error('🚨 Errore nel salvataggio di recentlyPlayed:', error);
+    }
+  }
+
+  /**
+   * Carica la lista delle tracce riprodotte. Se sono passate più di 5 ore dall'ultimo aggiornamento,
+   * resetta la lista; altrimenti la ripristina.
+   */
+  private async loadRecentlyPlayed(): Promise<void> {
+    try {
+      const result = await Preferences.get({ key: this.recentlyPlayedKey });
+      if (result.value) {
+        const storedData = JSON.parse(result.value);
+        const { list, timestamp } = storedData;
+        const now = Date.now();
+        if (now - timestamp > this.RECENTLY_PLAYED_MAX_AGE) {
+          console.log('🔄 Sono passate più di 5 ore: reset di recentlyPlayed.');
+          this.recentlyPlayed = [];
+          await Preferences.remove({ key: this.recentlyPlayedKey });
+        } else {
+          this.recentlyPlayed = list || [];
+          console.log('✅ Lista recentlyPlayed caricata:', this.recentlyPlayed);
+        }
+      } else {
+        console.log('Nessuna recentlyPlayed salvata, uso lista vuota.');
+        this.recentlyPlayed = [];
+      }
+    } catch (error) {
+      console.error('🚨 Errore nel caricamento di recentlyPlayed:', error);
+      this.recentlyPlayed = [];
+    }
+  }
+
+  // Mappe per le etichette da mostrare
+  private emotionLabels: { [key: number]: string } = {
+    0: 'Tristezza',
+    1: 'Rabbia',
+    2: 'Felicità',
+    3: 'Paura',
+    4: 'Disgusto',
+  };
+  private activityLabels: { [key: number]: string } = {
+    1: 'Lavorando',
+    2: 'Studiando',
+    3: 'Rilassando',
+    4: 'Allenandoti',
+    5: 'Leggendo',
+    6: 'Giocando',
+    7: 'Meditando',
+    8: 'Cucinando',
+    9: 'Fotografando',
+    10: 'Panorami',
+  };
+  private locationLabels: { [key: number]: string } = {
+    1: 'Casa',
+    2: 'Ufficio',
+    3: 'Scuola',
+    4: 'Palestra',
+    5: 'Parco',
+    6: 'Viaggio',
+  };
+
+  get emotionLevelLabel(): string {
+    // Assumiamo che this.selectedEmotion sia un numero e che this.emotionLabels sia definito in maiuscolo
+    const emotionKey = this.emotionLabels[this.selectedEmotion].toUpperCase(); // ad es. "PAURA"
+    const levelIndex = Number(this.selectedEmotionLevel); // converte "7" in 7
+    const levels = EMOTION_CONFIGURATIONS[emotionKey];
+    if (levels && levelIndex >= 0 && levelIndex < levels.length) {
+      return levels[levelIndex].label; // Restituisce il label (ad es. "TERRORE")
+    }
+    return 'Sconosciuto';
+  }
+
+  private mapEmotionLevelFromConfig(
+    emotionKey: string,
+    levelLabel: string
+  ): number {
+    // Normalizza la chiave in uppercase
+    const normalizedKey = emotionKey.toUpperCase();
+    const levels = EMOTION_CONFIGURATIONS[normalizedKey];
+    if (!levels || levels.length === 0) {
+      console.warn(
+        `Nessuna configurazione trovata per l'emozione: ${normalizedKey}`
+      );
+      return 0;
+    }
+    // Cerca l'indice dove il label corrisponde (case-insensitive)
+    const index = levels.findIndex(
+      item => item.label.toUpperCase() === levelLabel.toUpperCase()
+    );
+    if (index === -1) {
+      console.warn(
+        `Livello "${levelLabel}" non trovato per l'emozione ${normalizedKey}. Uso default (0).`
+      );
+      return 0;
+    }
+    return index;
+  }
+
+  get emotionLabel(): string {
+    return this.emotionLabels[this.selectedEmotion] || 'Sconosciuta';
+  }
+  get activityLabel(): string {
+    return this.activityLabels[this.selectedActivity] || 'Sconosciuta';
+  }
+  get locationLabel(): string {
+    return this.locationLabels[this.selectedLocation] || 'Sconosciuta';
+  }
+  // Metodo aggiornato per caricare e parsare i parametri
+  async loadSelectedParameters(): Promise<void> {
+    try {
+      const locationResult = await Preferences.get({ key: 'selectedLocation' });
+      if (locationResult.value) {
+        this.selectedLocation = this.mapLocation(locationResult.value);
+      }
+      const activityResult = await Preferences.get({ key: 'selectedActivity' });
+      if (activityResult.value) {
+        this.selectedActivity = this.mapActivity(activityResult.value);
+      }
+      const emotionResult = await Preferences.get({ key: 'selectedEmotion' });
+      if (emotionResult.value) {
+        this.selectedEmotion = this.mapEmotion(emotionResult.value);
+      }
+      const emotionLevelResult = await Preferences.get({
+        key: 'selectedEmotionLevel',
+      });
+      if (emotionLevelResult.value) {
+        // Ottieni la chiave dell'emozione, ad esempio "PAURA" per selectedEmotion 3
+        const emotionKey = this.emotionLabels[this.selectedEmotion];
+        // Converte il label in indice usando la configurazione
+        const levelIndex = this.mapEmotionLevelFromConfig(
+          emotionKey,
+          emotionLevelResult.value
+        );
+        // Salva l'indice come stringa oppure come numero, a seconda delle tue esigenze
+        this.selectedEmotionLevel = String(levelIndex);
+      }
+      console.log('Parametri caricati:', {
+        selectedLocation: this.selectedLocation,
+        selectedActivity: this.selectedActivity,
+        selectedEmotion: this.selectedEmotion,
+        selectedEmotionLevel: this.selectedEmotionLevel,
+      });
+    } catch (error) {
+      console.error('Errore nel caricamento dei parametri:', error);
+    }
   }
 }

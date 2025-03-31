@@ -1,4 +1,3 @@
-// MemoryStore.ts
 import { Preferences } from '@capacitor/preferences';
 import { TrackRating } from './track-rating';
 
@@ -162,45 +161,5 @@ export class MemoryStore {
       all = all.concat(list);
     });
     return all;
-  }
-
-  /**
-   * Restituisce le tracce per un contesto specifico.
-   */
-  public getTracksForContext(
-    emotion: string,
-    emotionLevel: number,
-    activity: number,
-    location: number
-  ): TrackRating[] {
-    const key = this.buildKey(emotion, emotionLevel, activity, location);
-    return this.memory.get(key) || [];
-  }
-
-  /**
-   * Calcola e restituisce le statistiche dei mood basate sul numero di tracce per ciascun contesto.
-   * Usa solo la parte relativa all'emotion della chiave.
-   */
-  public getMoodStatistics(): { [mood: string]: number } {
-    const moodCounts: { [mood: string]: number } = {};
-    this.memory.forEach((tracks: TrackRating[], key: string) => {
-      const parts = key.split('-');
-      const mood = parts[0];
-      moodCounts[mood] = (moodCounts[mood] || 0) + tracks.length;
-    });
-    return moodCounts;
-  }
-
-  /**
-   * Resetta la memoria, cancellando i dati salvati.
-   */
-  public async reset(): Promise<void> {
-    this.memory.clear();
-    try {
-      await Preferences.remove({ key: this.storageKey });
-      console.log('Memoria resettata correttamente.');
-    } catch (error) {
-      console.error('Errore durante il reset della memoria:', error);
-    }
   }
 }

@@ -226,3 +226,75 @@
     font-size: 14px;
   }
 }
+.parameters-summary {
+  margin-top: 2rem; /* Spazio in alto */
+  padding: 0 1rem; /* Aggiunto padding laterale per evitare che il contenuto tocchi i bordi */
+  text-align: center; /* Centra il contenuto */
+}
+
+/* Contenitore che centra il contenuto orizzontalmente */
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Lista comune a tutti i parametri */
+.param-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+::ng-deep .parameters-summary .p-card-title {
+  color: var(--highlight-dark) !important;
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  text-transform: uppercase;
+}
+
+::ng-deep .parameters-summary .p-card-content,
+::ng-deep .parameters-summary ul,
+::ng-deep .parameters-summary li,
+::ng-deep .parameters-summary .value-text {
+  color: var(--primary-color) !important;
+  font-size: 1rem !important;
+}
+
+/* Stile degli <li> */
+.param-list li {
+  font-size: 14px;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Adattamenti per dispositivi mobili */
+@media (max-width: 768px) {
+  .param-list {
+    flex-direction: column; /* Disposizione verticale */
+    align-items: center; /* Centra gli elementi all'interno della lista */
+    gap: 0.5rem;
+    padding: 0 1rem; /* Padding orizzontale */
+  }
+
+  .param-list li {
+    font-size: 16px; /* Testo più grande per leggibilità */
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+    text-align: center; /* Centra il testo */
+  }
+
+  .center-container {
+    padding: 0 1rem;
+  }
+
+  .parameters-summary {
+    margin-top: 1rem;
+    font-size: 16px; /* Puoi regolare il font-size per il riepilogo */
+    text-align: center; /* Assicurati che il testo all'interno della card sia centrato */
+  }
+}

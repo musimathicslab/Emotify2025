@@ -7,19 +7,15 @@ export class RLAgent {
   private epsilon: number;
   private readonly epsilonDecay: number;
   private readonly minEpsilon: number;
-  private readonly gamma: number;
-  private readonly actionSpaceSize: number;
   private bestLoss: number | null = null;
   private bestWeights: tf.Tensor[] | null = null;
 
   constructor(inputDim: number, actionSpaceSize: number) {
-    this.actionSpaceSize = actionSpaceSize;
     this.optimizer = tf.train.adam(0.001);
     this.qNetwork = this.createQNetwork(inputDim, actionSpaceSize);
     this.epsilon = 1.0;
     this.epsilonDecay = 0.99;
     this.minEpsilon = 0.1;
-    this.gamma = 0.95;
   }
 
   private createQNetwork(inputDim: number, outputDim: number): tf.Sequential {
@@ -41,22 +37,6 @@ export class RLAgent {
       const output = this.qNetwork.predict(input) as tf.Tensor;
       return Array.from(output.dataSync());
     });
-  }
-
-  public selectAction(state: number[], candidatePenalties?: number[]): number {
-    if (Math.random() < this.epsilon) {
-      return Math.floor(Math.random() * this.actionSpaceSize);
-    } else {
-      const qValues = this.predict(state);
-      if (candidatePenalties && candidatePenalties.length === qValues.length) {
-        const penalizedQValues = qValues.map(
-          (q, idx) => q - candidatePenalties[idx]
-        );
-        return penalizedQValues.indexOf(Math.max(...penalizedQValues));
-      } else {
-        return qValues.indexOf(Math.max(...qValues));
-      }
-    }
   }
 
   public async trainStep(

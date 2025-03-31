@@ -38,7 +38,7 @@
 .parameter-container {
   width: 100%;
   max-width: 1200px;
-  margin-top: 30px;
+  margin-top: 10px;
   background-color: #fff; /* Sfondo bianco uguale per entrambi */
   border-radius: 12px;
   padding: 20px;
@@ -257,16 +257,21 @@
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; /* Per uno scrolling fluido su iOS */
   }
+
   .emotion-grid {
     display: flex !important;
     flex-wrap: nowrap;
+    width: max-content; /* Forza la larghezza necessaria per contenere tutte le card */
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+
   .emotion-grid::-webkit-scrollbar {
     display: none;
   }
+
   .emotion-card {
     flex: 0 0 auto;
     width: 120px;
@@ -274,35 +279,8 @@
     margin: 0 5px;
   }
 
-  /* Frecce di navigazione su mobile */
-  .arrow-btn {
-    display: flex;
-    background: rgba(0, 0, 0, 0.3);
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    font-size: 2rem;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-  }
-  .arrow-btn:hover {
-    background: rgba(0, 0, 0, 0.5);
-  }
-  .arrow-btn.left {
-    left: 0;
-    margin-left: 5px;
-  }
-  .arrow-btn.right {
-    right: 0;
-    margin-right: 5px;
+  .rating-container {
+    padding: 0;
   }
 }
 
@@ -329,9 +307,6 @@
     padding: 20px 0;
   }
 
-  .arrow-btn {
-    display: none;
-  }
   .parameter-item {
     /* Aumentiamo la larghezza massima per consentire uno slider più lungo */
     max-width: 500px;

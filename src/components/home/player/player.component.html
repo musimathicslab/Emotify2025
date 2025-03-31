@@ -55,28 +55,59 @@
         </div>
       </p-card>
 
-      <!-- Sezione per la valutazione (mostrata solo se trainingCount < trainingLimit) -->
+      <p-card class="parameters-summary p-mt-3">
+        <ng-template pTemplate="title"> Parametri selezionati </ng-template>
+        <ng-template pTemplate="content">
+          <div class="center-container">
+            <ul class="param-list horizontal-list">
+              <li>
+                <strong>Luogo:</strong>
+                <span class="value-text">{{ locationLabel }}</span>
+              </li>
+              <li>
+                <strong>Attività:</strong>
+                <span class="value-text">{{ activityLabel }}</span>
+              </li>
+              <li>
+                <strong>Emozione:</strong>
+                <span class="value-text">{{ emotionLabel }}</span>
+              </li>
+              <li>
+                <strong>Livello Emozione: </strong>
+                <span>{{ emotionLevelLabel | lowercase }}</span>
+              </li>
+            </ul>
+          </div>
+        </ng-template>
+      </p-card>
+
+      <!-- Sezione per la valutazione (mostrata solo se currentTrainingCount < trainingLimit) -->
       <app-rating
-        *ngIf="trainingCount < trainingLimit"
+        *ngIf="currentTrainingCount < trainingLimit"
         (onSubmitRatings)="handleRatings($event)">
       </app-rating>
 
-      <!-- Barra di progresso dell'addestramento (mostrata se trainingCount < trainingLimit) -->
+      <!-- Barra di progresso dell'addestramento (mostrata se currentTrainingCount < trainingLimit) -->
       <div
         class="training-progress-container"
-        *ngIf="trainingCount < trainingLimit">
+        *ngIf="currentTrainingCount < trainingLimit">
         <div class="progress-box">
           <p class="progress-title">
             <i class="pi pi-chart-line"></i>
-            Addestramento in corso:
-            {{ trainingCount }} / {{ trainingLimit }}
+            Addestramento in corso: {{ currentTrainingCount }} /
+            {{ trainingLimit }}
           </p>
           <div class="progress-wrapper">
             <div
               class="progress-bar"
-              [style.width]="(trainingCount / trainingLimit) * 100 + '%'">
+              [style.width]="
+                (currentTrainingCount / trainingLimit) * 100 + '%'
+              ">
               <span class="progress-text">
-                {{ (trainingCount / trainingLimit) * 100 | number: '1.0-0' }}%
+                {{
+                  (currentTrainingCount / trainingLimit) * 100
+                    | number: '1.0-0'
+                }}%
               </span>
             </div>
           </div>

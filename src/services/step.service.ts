@@ -20,7 +20,14 @@ export class StepService {
   }
 
   async setStep(step: number): Promise<void> {
-    this.currentStepSubject.next(step);
+    // Salva lo step
     await Preferences.set({ key: 'currentStep', value: step.toString() });
+    // Salva anche il timestamp corrente
+    await Preferences.set({
+      key: 'currentStepTimestamp',
+      value: Date.now().toString(),
+    });
+    // Notifica i subscriber (ad es. se usi un BehaviorSubject)
+    this.currentStepSubject.next(step);
   }
 }

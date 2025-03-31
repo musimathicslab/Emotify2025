@@ -5,12 +5,8 @@
       <h3>Valuta la canzone</h3>
       <h4>Quale emozione rappresenta il brano che hai appena ascoltato?</h4>
 
-      <!-- Container per la scrollbar e le frecce (solo mobile) -->
+      <!-- Container per la scrollbar -->
       <div class="emotion-slider-container">
-        <button class="arrow-btn left" (click)="scrollEmotion('left')">
-          ‹
-        </button>
-
         <div class="emotion-grid" #emotionGrid>
           <div
             *ngFor="let emotion of emotions"
@@ -23,10 +19,6 @@
             <span>{{ emotion.name }}</span>
           </div>
         </div>
-
-        <button class="arrow-btn right" (click)="scrollEmotion('right')">
-          ›
-        </button>
       </div>
     </div>
 
@@ -37,6 +29,7 @@
         Identifica i parametri della canzone ideale per te per questa emozione
       </h4>
 
+      <!-- Versione Desktop -->
       <div class="parameter-list-desktop">
         <ng-container
           *ngFor="
@@ -80,7 +73,8 @@
                   ),
                   index: filteredIndexes()[activeParameterIndex],
                 }
-              "></ng-container>
+              ">
+            </ng-container>
           </ng-container>
         </div>
 
@@ -105,17 +99,16 @@
           {{ getParameterLabel(index) }}
         </label>
         <div class="slider-range">
-          <span class="slider-min">0</span>
+          <span class="slider-min">{{ getSliderMinLabel(index) }}</span>
           <p-slider
             formControlName="value"
             [min]="0"
             [max]="100"
             [style]="{ width: '120px' }"></p-slider>
-          <span class="slider-max">100</span>
+          <span class="slider-max">{{ getSliderMaxLabel(index) }}</span>
         </div>
-        <span class="slider-value">
-          {{ param.get('value')?.value }}
-        </span>
+        <!-- Mostra il valore numerico sotto lo slider -->
+        <span class="slider-value">{{ param.get('value')?.value }}</span>
       </div>
     </ng-template>
 
@@ -124,7 +117,8 @@
       <p-button
         label="Invia valutazione"
         (click)="submitRatings()"
-        [disabled]="!formGroup.valid"></p-button>
+        [disabled]="!formGroup.valid">
+      </p-button>
     </div>
   </div>
 </form>

@@ -11,8 +11,6 @@ import {
 } from '@angular/core';
 import * as d3 from 'd3';
 import { Preferences } from '@capacitor/preferences';
-import { NgIf } from '@angular/common';
-import { Capacitor } from '@capacitor/core';
 
 export const EMOTION_CONFIGURATIONS: { [key: string]: any[] } = {
   PAURA: [
@@ -434,7 +432,6 @@ const EMOTION_HIGHLIGHT_COLORS: { [key: string]: string } = {
   `,
   styleUrls: ['./emotion-graph.component.css'],
   standalone: true,
-  imports: [NgIf],
 })
 export class EmotionGraphComponent implements AfterViewInit, OnChanges {
   @ViewChild('mainContainer', { static: true })
@@ -667,7 +664,6 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
       (prev: { x: number; y: number }, curr: { x: number; y: number }) =>
         curr.y < prev.y ? curr : prev
     );
-
 
     const textElement = svg
       .append<SVGTextElement>('text')

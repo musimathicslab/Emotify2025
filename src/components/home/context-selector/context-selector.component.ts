@@ -18,12 +18,15 @@ import { Capacitor } from '@capacitor/core';
 import { MobileLoginComponent } from '../../login/mobile-login-lastfm/mobile-login-lastfm.component';
 import { LastfmLoginComponent } from '../../login/lastfm-login/lastfm-login.component';
 import { Preferences } from '@capacitor/preferences';
+import { MessageService } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-context-selector',
   templateUrl: './context-selector.component.html',
   styleUrls: ['./context-selector.component.css'],
   standalone: true,
+  providers: [MessageService],
   imports: [
     EmotionMapComponent,
     EmotionGraphComponent,
@@ -36,13 +39,14 @@ import { Preferences } from '@capacitor/preferences';
     NgForOf,
     MobileLoginComponent,
     LastfmLoginComponent,
+    Toast,
   ],
 })
 export class ContextSelectorComponent implements OnInit {
   currentStep: number = 0;
   selectedLocation: string | null = null;
   selectedActivity: string | null = null;
-  selectedEmotion: string = 'PAURA';
+  selectedEmotion: string = '';
   selectedEmotionLevel: string = 'LOW';
 
   isLastFmLoggedIn = false;
@@ -58,7 +62,10 @@ export class ContextSelectorComponent implements OnInit {
   allActivities = ACTIVITIES;
   filteredActivities = this.allActivities;
 
-  constructor(private stepService: StepService) {}
+  constructor(
+    private stepService: StepService,
+    private messageService: MessageService
+  ) {}
 
   async ngOnInit(): Promise<void> {
     // Verifica se l'app è in modalità mobile
@@ -74,14 +81,40 @@ export class ContextSelectorComponent implements OnInit {
     this.isLastFmLoggedIn = !!lastFmAuthToken.value;
     this.isSpotifyLoggedIn = !!spotifyTokenResult.value;
 
-    // Se non ci sono step salvati, impostiamo in base allo stato di autenticazione
-    // (Altrimenti il StepService ha già caricato il valore salvato)
-    if (!(await this.getSavedStep())) {
+    // Recupera lo step salvato (verificando il timestamp)
+    const savedStep = await this.getSavedStep();
+    if (savedStep !== null) {
+      await this.stepService.setStep(savedStep);
+    } else {
       if (this.isLastFmLoggedIn && this.isSpotifyLoggedIn) {
         await this.stepService.setStep(2);
       } else if (this.isLastFmLoggedIn && !this.isSpotifyLoggedIn) {
         await this.stepService.setStep(1);
+      } else {
+        await this.stepService.setStep(0);
       }
+    }
+
+    const savedLocation = await Preferences.get({ key: 'selectedLocation' });
+    if (savedLocation.value) {
+      this.selectedLocation = savedLocation.value;
+
+      // Filtra le attività compatibili con il luogo salvato
+      this.filteredActivities = this.allActivities.filter(activity =>
+        activity.locations.includes(this.selectedLocation!)
+      );
+
+      console.log(
+        `✅ Attività filtrate per il luogo selezionato: ${this.selectedLocation}`
+      );
+    } else {
+      console.warn('⚠️ Nessun luogo salvato trovato.');
+      this.filteredActivities = this.allActivities; // Mostra tutte le attività se il luogo non è selezionato
+    }
+    // Recupera l'attività salvata (se presente)
+    const savedActivity = await Preferences.get({ key: 'selectedActivity' });
+    if (savedActivity.value) {
+      this.selectedActivity = savedActivity.value;
     }
 
     // Sottoscrizione per aggiornare currentStep
@@ -91,18 +124,39 @@ export class ContextSelectorComponent implements OnInit {
   }
 
   async getSavedStep(): Promise<number | null> {
-    const result = await Preferences.get({ key: 'currentStep' });
-    return result.value ? parseInt(result.value, 10) : null;
+    const stepResult = await Preferences.get({ key: 'currentStep' });
+    const timestampResult = await Preferences.get({
+      key: 'currentStepTimestamp',
+    });
+
+    if (stepResult.value && timestampResult.value) {
+      const savedStep = parseInt(stepResult.value, 10);
+      const savedTimestamp = parseInt(timestampResult.value, 10);
+      const now = Date.now();
+      if (now - savedTimestamp > 600000) {
+        if (this.isLastFmLoggedIn && this.isSpotifyLoggedIn) {
+          return 3;
+        }
+        return null;
+      } else {
+        return savedStep;
+      }
+    }
+    return null;
   }
 
   goToNextStep(): void {
-    if (this.currentStep < this.steps.length - 1) {
-      this.stepService.setStep(this.currentStep + 1);
+    const nextStep = this.currentStep + 1;
+    if (this.canNavigateToStep(nextStep)) {
+      this.stepService.setStep(nextStep);
+    } else {
+      console.warn(
+        `Non puoi avanzare perché non hai selezionato tutti i dati necessari.`
+      );
     }
   }
 
   handleStepSelection(event: any): void {
-    // Se l'evento è un numero, usalo direttamente come indice
     const stepIndex =
       typeof event === 'number'
         ? event
@@ -127,6 +181,13 @@ export class ContextSelectorComponent implements OnInit {
       );
       return;
     }
+    // Se si sta andando avanti allo step delle attività (es. step 4)
+    // e se il luogo è stato selezionato, applica il filtro
+    if (step === 4 && step > this.currentStep && this.selectedLocation) {
+      this.filteredActivities = this.allActivities.filter(activity =>
+        activity.locations.includes(this.selectedLocation!)
+      );
+    }
     if (this.canNavigateToStep(step)) {
       this.stepService.setStep(step);
     } else {
@@ -150,8 +211,17 @@ export class ContextSelectorComponent implements OnInit {
     return step === this.currentStep + 1;
   }
 
+  handleEmotionSelected(emotion: string): void {
+    // Selezione e salvataggio (converti in numero se necessario)
+    this.selectedEmotion = emotion;
+    Preferences.set({ key: 'selectedEmotion', value: emotion });
+    this.goToStep(5);
+  }
+
   selectLocation(location: string): void {
+    // Salva e applica filtro
     this.selectedLocation = location;
+    Preferences.set({ key: 'selectedLocation', value: location });
     this.filteredActivities = this.allActivities.filter(activity =>
       activity.locations.includes(location)
     );
@@ -160,13 +230,8 @@ export class ContextSelectorComponent implements OnInit {
 
   selectActivity(activity: string): void {
     this.selectedActivity = activity;
+    Preferences.set({ key: 'selectedActivity', value: activity });
     this.goToNextStep();
-  }
-
-  handleEmotionSelected(emotion: string): void {
-    this.selectedEmotion = emotion; // ad esempio, "FELICITÀ"
-    Preferences.set({ key: 'selectedEmotion', value: emotion });
-    this.goToStep(5); // Vai allo step del grafico
   }
 
   handleEmotionLevelSelected(emotion: { name: string; level: string }): void {
@@ -174,8 +239,8 @@ export class ContextSelectorComponent implements OnInit {
       console.error('Errore: dati emozione non validi', emotion);
       return;
     }
-    this.selectedEmotionLevel = emotion.name;
-
+    this.selectedEmotionLevel = emotion.level;
+    Preferences.set({ key: 'selectedEmotionLevel', value: emotion.level });
     this.goToStep(6);
   }
 
@@ -205,7 +270,6 @@ export class ContextSelectorComponent implements OnInit {
     };
     return emotion ? (mapping[emotion.toLowerCase()] ?? 0) : 0;
   }
-
   mapActivity(activity: string | null): number {
     const mapping: { [key: string]: number } = {
       lavorando: 1,

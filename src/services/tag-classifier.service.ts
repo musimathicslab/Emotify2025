@@ -206,9 +206,4 @@ export class TagVocabularyHelper {
       console.error('Errore durante il reset del vocabolario:', error);
     }
   }
-
-  // Restituisce l'elenco dei tag (le chiavi del vocabolario)
-  public getVocabulary(): string[] {
-    return Object.keys(this.tagCounts);
-  }
 }

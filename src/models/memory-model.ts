@@ -1,3 +1,4 @@
+import { BehaviorSubject } from 'rxjs';
 import { TrackRating } from './track-rating';
 import { NeuralModelService } from '../services/neural-model.service';
 import { MemoryStore } from './ memory-store';
@@ -7,10 +8,17 @@ export class MemoryModelImpl {
   public memoryStore: MemoryStore;
   private modelService: NeuralModelService;
 
+  // Aggiungi un BehaviorSubject che tiene traccia delle tracce memorizzate
+  private tracksSubject = new BehaviorSubject<TrackRating[]>([]);
+  // Esponi l'Observable per permettere la sottoscrizione da altri componenti
+  public tracks$ = this.tracksSubject.asObservable();
+
   constructor() {
     // Inizializza lo store e il modello
     this.memoryStore = new MemoryStore('memoryModel');
     this.modelService = new NeuralModelService(9);
+    // Inizializza il BehaviorSubject con le tracce correnti
+    this.tracksSubject.next(this.memoryStore.getAllTracks());
   }
 
   /**
@@ -42,13 +50,17 @@ export class MemoryModelImpl {
       emotionLevel,
       activity,
       location,
-      allTags, // Usa l'unione dei tag
+      allTags,
       tempo,
       danceability,
       instrumentalness,
       speechiness,
       loudness
     );
+
+    // Dopo l'aggiunta, aggiorna il BehaviorSubject con le tracce aggiornate
+    const updatedTracks = this.memoryStore.getAllTracks();
+    this.tracksSubject.next(updatedTracks);
   }
 
   /**
@@ -75,110 +87,9 @@ export class MemoryModelImpl {
   }
 
   /**
-   * Predice audio features date le dimensioni di contesto.
-   */
-  public predictAudioFeatures(context: number[]): number[] {
-    return this.modelService.predictAudioFeatures(context);
-  }
-
-  /**
    * Restituisce tutte le tracce memorizzate.
    */
   public getAllTracks(): TrackRating[] {
     return this.memoryStore.getAllTracks();
-  }
-
-  /**
-   * Restituisce le tracce per un contesto specifico.
-   */
-  public getTracksForContext(
-    emotion: string,
-    emotionLevel: number,
-    activity: number,
-    location: number
-  ): TrackRating[] {
-    return this.memoryStore.getTracksForContext(
-      emotion,
-      emotionLevel,
-      activity,
-      location
-    );
-  }
-
-  /**
-   * Restituisce le statistiche dei mood.
-   */
-  public getMoodStatistics(): { [mood: string]: number } {
-    return this.memoryStore.getMoodStatistics();
-  }
-
-  /**
-   * Restituisce la traccia più simile data la similarità coseno.
-   */
-  public getSimilarTrackForContext(
-    emotion: string,
-    emotionLevel: number,
-    activity: number,
-    location: number,
-    inputFeatures: number[]
-  ): TrackRating | null {
-    const trackList = this.memoryStore.getTracksForContext(
-      emotion,
-      emotionLevel,
-      activity,
-      location
-    );
-    if (!trackList || trackList.length === 0) {
-      console.warn(
-        `🚨 Nessuna traccia in memoria per contesto: ${emotion}-${emotionLevel}-${activity}-${location}`
-      );
-      return null;
-    }
-
-    const cosineSimilarity = (v1: number[], v2: number[]): number => {
-      const dot = v1.reduce(
-        (sum: number, val: number, i: number) => sum + val * v2[i],
-        0
-      );
-      const mag1 = Math.sqrt(
-        v1.reduce((sum: number, val: number) => sum + val * val, 0)
-      );
-      const mag2 = Math.sqrt(
-        v2.reduce((sum: number, val: number) => sum + val * val, 0)
-      );
-      if (mag1 === 0 || mag2 === 0) return 0;
-      return dot / (mag1 * mag2);
-    };
-
-    const similarities: number[] = trackList.map((tr: TrackRating) =>
-      cosineSimilarity(inputFeatures, tr.audioFeatures)
-    );
-    const maxSim = Math.max(...similarities);
-    const threshold = maxSim * 0.9;
-    const topCandidates = trackList.filter(
-      (_, i: number) => similarities[i] >= threshold
-    );
-
-    if (topCandidates.length === 0) {
-      const bestIndex = similarities.indexOf(maxSim);
-      return trackList[bestIndex];
-    }
-
-    const randomIndex = Math.floor(Math.random() * topCandidates.length);
-    return topCandidates[randomIndex];
-  }
-
-  /**
-   * Salva il modello neurale su storage locale.
-   */
-  public async saveModelToLocal(): Promise<void> {
-    await this.modelService.saveModel('my-tf-model');
-  }
-
-  /**
-   * Carica il modello neurale da storage locale.
-   */
-  public async loadModelFromLocal(): Promise<void> {
-    this.modelService = await NeuralModelService.loadModel(9, 'my-tf-model');
   }
 }

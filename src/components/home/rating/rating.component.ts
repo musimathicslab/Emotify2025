@@ -5,6 +5,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  Renderer2,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -12,16 +13,15 @@ import {
   FormBuilder,
   FormControl,
   FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SliderModule } from 'primeng/slider';
 import { ButtonModule } from 'primeng/button';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { RatingModule } from 'primeng/rating';
-import { Tooltip } from 'primeng/tooltip';
+import { TooltipModule } from 'primeng/tooltip';
 import { EmotionsService } from '../../../services/emotions.service';
 
 @Component({
@@ -37,13 +37,12 @@ import { EmotionsService } from '../../../services/emotions.service';
     ButtonModule,
     RadioButtonModule,
     RatingModule,
-    Tooltip,
+    TooltipModule,
   ],
 })
 export class RatingComponent implements OnInit {
   @Output() onSubmitRatings = new EventEmitter<any>();
 
-  parameterList!: ElementRef<HTMLDivElement>;
   @ViewChild('emotionGrid', { static: false })
   emotionGrid!: ElementRef<HTMLDivElement>;
 
@@ -58,36 +57,6 @@ export class RatingComponent implements OnInit {
   emotions: { code: number; name: string; img: string }[] = [];
   activeParameterIndex: number = 0;
 
-  constructor(
-    private fb: FormBuilder,
-    private emotionService: EmotionsService
-  ) {}
-
-  ngOnInit() {
-    // Il formGroup include 'songRating' (non 'rating')
-    this.formGroup = this.fb.group({
-      selectedEmotion: [0],
-      songRating: [3],
-      parameterControls: this.fb.array([]),
-    });
-    this.emotions = this.emotionService.getEmotionNamesWithImg();
-    this.initializeFormControls();
-  }
-
-  initializeFormControls() {
-    const parameterArray = this.formGroup.get('parameterControls') as FormArray;
-    if (!parameterArray) return;
-    parameterArray.clear();
-    this.parameters.forEach(param => {
-      parameterArray.push(
-        this.fb.group({
-          label: new FormControl(param.label),
-          value: new FormControl(50, { validators: [Validators.required] }),
-        })
-      );
-    });
-  }
-
   // Mappatura degli estremi con un unico sostantivo per ciascun parametro
   sliderLabels: { [key: string]: { low: string; high: string } } = {
     Tempo: { low: 'lento', high: 'veloce' },
@@ -97,16 +66,32 @@ export class RatingComponent implements OnInit {
     Loudness: { low: 'rilassante', high: 'potente' },
   };
 
-  // Metodo per ottenere l'etichetta minima
-  getSliderMinLabel(index: number): string {
-    const label = this.getParameterLabel(index);
-    return this.sliderLabels[label]?.low || 'Min';
-  }
+  parameterTooltips = [
+    'Velocità del brano (battiti per minuto).',
+    'Quanto è ballabile la traccia.',
+    'Quanto è strumentale (senza voce).',
+    'Percentuale di parlato nel brano.',
+    'Volume medio della traccia.',
+  ];
 
-  // Metodo per ottenere l'etichetta massima
-  getSliderMaxLabel(index: number): string {
-    const label = this.getParameterLabel(index);
-    return this.sliderLabels[label]?.high || 'Max';
+  constructor(
+    private fb: FormBuilder,
+    private emotionService: EmotionsService
+  ) {}
+
+  ngOnInit() {
+    this.formGroup = this.fb.group({
+      selectedEmotion: [0],
+      parameterControls: this.fb.array(
+        this.parameters.map(param =>
+          this.fb.group({
+            label: new FormControl(param.label),
+            value: new FormControl(param.value, Validators.required),
+          })
+        )
+      ),
+    });
+    this.emotions = this.emotionService.getEmotionNamesWithImg();
   }
 
   get parameterControls(): FormArray {
@@ -123,57 +108,25 @@ export class RatingComponent implements OnInit {
   }
 
   getParameterLabel(index: number): string {
-    return this.parameterControls.at(index).get('label')?.value;
+    return this.parameterControls.at(index).get('label')?.value || '';
   }
 
-  parameterTooltips = [
-    'Velocità del brano (battiti per minuto).',
-    'Quanto è ballabile la traccia.',
-    'Quanto è strumentale (senza voce).',
-    'Percentuale di parlato nel brano.',
-    'Volume medio della traccia.',
-  ];
+  getSliderMinLabel(index: number): string {
+    const label = this.getParameterLabel(index);
+    return this.sliderLabels[label]?.low || 'Min';
+  }
+
+  getSliderMaxLabel(index: number): string {
+    const label = this.getParameterLabel(index);
+    return this.sliderLabels[label]?.high || 'Max';
+  }
 
   getParameterTooltip(index: number): string {
     return this.parameterTooltips[index] || '';
   }
 
-  // Navigazione per la versione mobile del carousel dei parametri
   goToParameter(index: number) {
     this.activeParameterIndex = index;
-  }
-
-  // Funzione per scroll (se volessi usare anche le frecce per la versione mobile, opzionale)
-  scrollParam(direction: 'left' | 'right') {
-    if (direction === 'left') {
-      this.activeParameterIndex = Math.max(0, this.activeParameterIndex - 1);
-    } else {
-      this.activeParameterIndex = Math.min(
-        this.parameterControls.length - 1,
-        this.activeParameterIndex + 1
-      );
-    }
-  }
-
-  scrollEmotion(direction: 'left' | 'right') {
-    if (!this.emotionGrid) return;
-
-    const element = this.emotionGrid.nativeElement;
-    const scrollAmount = element.clientWidth;
-
-    // Calcolo la posizione di scroll target (nuova posizione)
-    let newLeft =
-      element.scrollLeft +
-      (direction === 'left' ? -scrollAmount : scrollAmount);
-
-    // Limito il valore tra 0 (inizio) e maxScrollLeft (fine)
-    const maxScrollLeft = element.scrollWidth - element.clientWidth;
-    if (newLeft < 0) {
-      newLeft = 0;
-    } else if (newLeft > maxScrollLeft) {
-      newLeft = maxScrollLeft;
-    }
-    element.scrollTo({ left: newLeft, behavior: 'smooth' });
   }
 
   getFormGroup(control: AbstractControl): FormGroup {
@@ -181,7 +134,6 @@ export class RatingComponent implements OnInit {
   }
 
   shouldShowParameter(index: number): boolean {
-    // Valore di Instrumentalness (assumendo sia il 3° slider, index=2)
     const instrumentalnessValue =
       this.parameterControls.at(3).get('value')?.value ?? 0;
 
@@ -189,11 +141,9 @@ export class RatingComponent implements OnInit {
       return true;
     }
 
-    // Altri parametri (1,3,4) li mostriamo solo se Instrumentalness > 50
     return instrumentalnessValue > 50;
   }
 
-  // Filtro gli indici che sono “visibili”
   filteredIndexes(): number[] {
     return this.parameterControls.controls
       .map((_, i) => i)

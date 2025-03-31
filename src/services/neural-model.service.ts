@@ -80,38 +80,6 @@ export class NeuralModelService {
   }
 
   /**
-   * Addestra il modello su un batch di dati.
-   * @param contexts Array bidimensionale di input
-   * @param featuresTargets Array bidimensionale dei target per le audio features
-   * @param emotionTargets Array bidimensionale dei target one-hot per le emozioni
-   */
-  public async trainBatch(
-    contexts: number[][],
-    featuresTargets: number[][],
-    emotionTargets: number[][]
-  ): Promise<void> {
-    const xs = tf.tensor2d(contexts, [contexts.length, contexts[0].length]);
-    const ysFeatures = tf.tensor2d(featuresTargets, [
-      featuresTargets.length,
-      featuresTargets[0].length,
-    ]);
-    const ysEmotion = tf.tensor2d(emotionTargets, [
-      emotionTargets.length,
-      emotionTargets[0].length,
-    ]);
-    try {
-      await this.model.fit(xs, [ysFeatures, ysEmotion], { epochs: 10 });
-      console.log('Addestramento batch completato');
-    } catch (error) {
-      console.error('Errore in trainBatch:', error);
-    } finally {
-      xs.dispose();
-      ysFeatures.dispose();
-      ysEmotion.dispose();
-    }
-  }
-
-  /**
    * Effettua la predizione su un dato contesto.
    * @param context Array di input di dimensione inputDim
    * @returns Un oggetto contenente:
@@ -165,9 +133,5 @@ export class NeuralModelService {
       );
     }
     return service;
-  }
-
-  public predictAudioFeatures(context: number[]): number[] {
-    return this.predict(context).features;
   }
 }
