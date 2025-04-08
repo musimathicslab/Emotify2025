@@ -1,4 +1,7 @@
 import { Injectable } from '@angular/core';
+import { lastValueFrom, throwError } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
+import { Preferences } from '@capacitor/preferences'; 
 import {
   BehaviorSubject,
   from,
@@ -380,51 +383,15 @@ export class SpotifyPlayerService {
     }
   }
 
-  public async getSpotifyTop50Playlist(): Promise<
-    { title: string; artist: string }[]
-  > {
-    const token = await this.spotifyLoginService.getValidAccessToken();
-    if (!token) {
-      console.error(
-        '🚨 Token non disponibile per ottenere la playlist Top 50 di Spotify.'
-      );
-      return [];
-    }
-    // Sostituisci con l'ID della playlist desiderata.
-    // Ad esempio, per "Top 50 Global" puoi usare: "37i9dQZEVXbMDoHDwVN2tF"
-    const playlistId = '37i9dQZEVXbMDoHDwVN2tF';
-    const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`;
 
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-      // Mappa i risultati in un array di oggetti { title, artist }
-      return data.items.map((item: any) => {
-        const track = item.track;
-        return {
-          title: track.name,
-          artist: track.artists.map((artist: any) => artist.name).join(', '),
-        };
-      });
-    } catch (error) {
-      console.error(
-        'Errore nel recuperare la playlist Top 50 di Spotify:',
-        error
-      );
-      return [];
-    }
-  }
+  
 
   public async getUserLikedTracks(
     limit: number = 50
   ): Promise<{ title: string; artist: string }[]> {
-    const token = await this.spotifyLoginService.getValidAccessToken();
+    const token = await this.spotifyLoginService
+      .getValidAccessToken()
+      .toPromise();
     if (!token) {
       console.error('🚨 Token non disponibile per ottenere le tracce salvate.');
       return [];

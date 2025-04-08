@@ -462,18 +462,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
       filteredCandidates = filteredCandidates.concat(fallback2);
     }
 
-    // Fallback 3: Aggiungo le tracce dalla playlist "Top 50 di Spotify", se ancora insufficienti
-    if (filteredCandidates.length < minRequiredTracks) {
-      console.warn(
-        'Fallback 3: tracce ancora insufficienti. Aggiungo tracce dalla playlist Top 50 di Spotify.'
-      );
-      let fallback3 = await this.spotifyPlayerService.getSpotifyTop50Playlist();
-      fallback3 = fallback3.filter(
-        candidate =>
-          !this.recentlyPlayed.includes(candidate.title.toLowerCase())
-      );
-      filteredCandidates = filteredCandidates.concat(fallback3);
-    }
+  
 
     if (filteredCandidates.length === 0) {
       console.warn('Tutti i candidati sono già stati riprodotti recentemente.');
