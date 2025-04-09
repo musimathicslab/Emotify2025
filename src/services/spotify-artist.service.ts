@@ -5,6 +5,11 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { SpotifyLoginService } from './spotify.service';
 import { Preferences } from '@capacitor/preferences';
 
+interface SpotifyArtist {
+  name: string;
+  images: { url: string }[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -24,24 +29,25 @@ export class SpotifyArtistService {
   getArtistImage(artistName: string): Observable<string> {
     return this.makeSearchRequest(artistName).pipe(
       map(response => {
-        const items = response?.artists?.items;
-        // Controlla se esiste almeno un artista, se il nome è simile e se sono presenti immagini
-        if (
-          items &&
-          items.length > 0 &&
-          this.isNameSimilar(artistName, items[0].name) &&
-          items[0].images &&
-          items[0].images.length > 0
-        ) {
-          // Restituisci l'immagine più grande (di solito la prima)
-          return items[0].images[0].url;
+        const items = response?.artists?.items as SpotifyArtist[];
+        if (items && items.length > 0) {
+          // Cerca il primo artista con immagini e nome simile
+          const found = items.find(
+            (item: SpotifyArtist) =>
+              this.isNameSimilar(artistName, item.name) &&
+              item.images &&
+              item.images.length > 0
+          );
+          if (found) {
+            // Restituisce l'immagine più grande (in genere la prima)
+            return found.images[0].url;
+          }
         }
-        // Se uno di questi controlli fallisce, restituisci l'immagine di fallback
-        return 'img/musician-2.png ';
+        // Se nessun risultato soddisfa le condizioni, restituisce l'immagine di fallback
+        return 'img/musician-2.png';
       }),
       catchError(error => {
         console.error('Errore in getArtistImage per', artistName, error);
-        // In caso di errori, restituisci l'immagine di fallback
         return of('img/musician-2.png');
       })
     );
@@ -65,7 +71,7 @@ export class SpotifyArtistService {
         const params = new HttpParams()
           .set('q', artistName)
           .set('type', 'artist')
-          .set('limit', '1');
+          .set('limit', '5');
 
         return this.http.get<any>(`${this.apiUrl}/search`, { headers, params });
       }),
@@ -83,7 +89,7 @@ export class SpotifyArtistService {
                 const params = new HttpParams()
                   .set('q', artistName)
                   .set('type', 'artist')
-                  .set('limit', '1');
+                  .set('limit', '5');
                 // Ripeti la richiesta con il nuovo token
                 return this.http.get<any>(`${this.apiUrl}/search`, {
                   headers: newHeaders,
@@ -104,8 +110,11 @@ export class SpotifyArtistService {
    * Puoi espandere questa logica per usare algoritmi di similarità più sofisticati.
    */
   private isNameSimilar(searchedName: string, resultName: string): boolean {
-    return (
-      searchedName.toLowerCase().trim() === resultName.toLowerCase().trim()
-    );
+    const normalizedSearched = searchedName.toLowerCase().trim();
+    const normalizedResult = resultName.toLowerCase().trim();
+    const match =
+      normalizedResult.includes(normalizedSearched) ||
+      normalizedSearched.includes(normalizedResult);
+    return match;
   }
 }
