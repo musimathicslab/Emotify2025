@@ -5,7 +5,6 @@ import {
   OnInit,
   Output,
   ViewChild,
-  Renderer2,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -13,10 +12,11 @@ import {
   FormBuilder,
   FormControl,
   FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SliderModule } from 'primeng/slider';
 import { ButtonModule } from 'primeng/button';
 import { RadioButtonModule } from 'primeng/radiobutton';

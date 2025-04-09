@@ -297,6 +297,15 @@ export class PlayerComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Se il training per l'emozione è completato, bypasso il controllo di rating
+    if (this.currentTrainingCount >= this.trainingLimit) {
+      this.isTrackRated = false;
+      this.isWarningShown = false; // Reset del flag per la nuova traccia
+      this.playNextSongWithRL();
+      return;
+    }
+
+    // Se la traccia non è stata valutata, blocco la riproduzione e chiedo la valutazione
     if (!this.isTrackRated && !this.isWarningShown) {
       this.messageService.add({
         severity: 'warn',
@@ -305,17 +314,11 @@ export class PlayerComponent implements OnInit, OnDestroy {
         life: 3000,
       });
       this.sendTrackRatingNotification();
-      this.isWarningShown = true; // Impedisce il messaggio di warning duplicato
+      this.isWarningShown = true; // Evita di mostrare il messaggio più volte
       return;
     }
 
-    if (this.currentTrainingCount >= this.trainingLimit) {
-      this.isTrackRated = false;
-      this.isWarningShown = false; // Reset del flag per la nuova traccia
-      this.playNextSongWithRL();
-      return;
-    }
-
+    // Condizione "normale": la traccia è stata valutata e posso passare alla successiva
     this.isTrackRated = false;
     this.isWarningShown = false;
     this.spotifyPlayerService.nextTrack();
@@ -461,8 +464,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
       );
       filteredCandidates = filteredCandidates.concat(fallback2);
     }
-
-  
 
     if (filteredCandidates.length === 0) {
       console.warn('Tutti i candidati sono già stati riprodotti recentemente.');

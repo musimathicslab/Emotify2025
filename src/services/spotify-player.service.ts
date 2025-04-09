@@ -1,7 +1,4 @@
 import { Injectable } from '@angular/core';
-import { lastValueFrom, throwError } from 'rxjs';
-import { catchError, timeout } from 'rxjs/operators';
-import { Preferences } from '@capacitor/preferences'; 
 import {
   BehaviorSubject,
   from,
@@ -382,9 +379,6 @@ export class SpotifyPlayerService {
       return [];
     }
   }
-
-
-  
 
   public async getUserLikedTracks(
     limit: number = 50
