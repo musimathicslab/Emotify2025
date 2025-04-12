@@ -68,10 +68,11 @@ export class RatingComponent implements OnInit {
 
   parameterTooltips = [
     'Velocità del brano (battiti per minuto).',
+    'Volume medio della traccia.',
     'Quanto è ballabile la traccia.',
     'Quanto è strumentale (senza voce).',
     'Percentuale di parlato nel brano.',
-    'Volume medio della traccia.',
+    
   ];
 
   constructor(
