@@ -43,3 +43,9 @@ Thumbs.db
 
 eval "$(ssh-agent -s)"
 eval "$(ssh-agent -s)".pub
+
+.env
+.env.*
+environments
+/src/environments
+src/environments/environment.ts

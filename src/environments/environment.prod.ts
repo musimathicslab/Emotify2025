@@ -5,7 +5,7 @@ export const environment = {
     apiUrl: 'https://api.spotify.com/v1',
     clientId: 'baa948d432a14c978668ca7cc53a4b2d',
     clientSecret: 'f91194effc8b4bd09aef00ff3224e67d',
-    redirectUri: 'http://localhost:4200/callback',
+    redirectUri: 'https://musimathicslab.github.io/Emotify2025/callback',
     scope:
       'user-read-private user-read-email playlist-read-private user-library-modify user-top-read user-read-playback-state user-modify-playback-state user-read-currently-playing streaming user-read-recently-played user-library-read user-follow-read',
     customPlayerName: 'Emotify2025',
