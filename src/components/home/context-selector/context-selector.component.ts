@@ -64,7 +64,6 @@ export class ContextSelectorComponent implements OnInit {
 
   constructor(
     private stepService: StepService,
-    private messageService: MessageService
   ) {}
 
   async ngOnInit(): Promise<void> {

@@ -150,3 +150,26 @@ li {
     height: auto;
   }
 }
+@media (max-width: 480px) {
+  .podium {
+    /* Stile "classico": riduciamo ulteriormente gap e margini */
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  .track-card {
+    width: 80px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .track-img {
+    width: 35px;
+    height: 35px;
+    margin: 3px 0;
+  }
+
+  .track-info {
+    font-size: 10px;
+  }
+}
