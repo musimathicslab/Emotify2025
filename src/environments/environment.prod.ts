@@ -12,8 +12,8 @@ export const environment = {
   },
   lastFm: {
     apiUrl: 'https://ws.audioscrobbler.com/2.0/',
-    apiKey: '6f3aba054ea20ed1ef80d41ce22e870d',
-    apiSecret: '2be8e6dd9b9a05c97b3c8b0e4ce32071',
-    callbackUrl: 'http://localhost:4200/callback-lastfm',
+    apiKey: '45854012fdd30c142c58da81d70d2dcc',
+    apiSecret: '8e4feca7174245366c1df09276806e1e',
+    callbackUrl: 'https://musimathicslab.github.io/Emotify2025/callback-lastfm',
   },
 };

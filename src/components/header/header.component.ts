@@ -33,7 +33,6 @@ export class HeaderComponent {
     private messageService: MessageService,
     private stepService: StepService,
     private eRef: ElementRef,
-    private spotifyPlayerService: SpotifyPlayerService
   ) {}
 
   @HostListener('document:click', ['$event.target'])
@@ -56,8 +55,7 @@ export class HeaderComponent {
 
   logout(): void {
     this.menuVisible = false;
-    // Interrompi la riproduzione se una traccia è in esecuzione
-    this.spotifyPlayerService.pause();
+
     Promise.all([
       Preferences.remove({ key: 'spotifyAccessToken' }),
       Preferences.remove({ key: 'spotifyRefreshToken' }),

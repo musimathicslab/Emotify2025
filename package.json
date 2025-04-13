@@ -8,8 +8,10 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "format": "prettier --write \"src/**/*.{ts,html,css}\"",
-    "resources": "cordova-res ios --skip-config && cordova-res android --skip-config"
+    "resources": "cordova-res ios --skip-config && cordova-res android --skip-config",
+    "deploy": "ng build --configuration production  --base-href \"/Emotify2025/\" && ngh --dir=dist/dalai-lama/browser --clean"
   },
+
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.1.3",
