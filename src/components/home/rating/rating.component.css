@@ -1,5 +1,5 @@
 /* -------------------------------------------------- */
-/*               STILI CONTAINER GENERALE             */
+/*       STILI CONTAINER GENERALE - AGGIORNATO         */
 /* -------------------------------------------------- */
 .rating-container {
   border-radius: 20px;
@@ -12,45 +12,44 @@
 }
 
 /* -------------------------------------------------- */
-/*              TITOLI: RIDOTTA SPAZIATURA            */
-/*             E h4 SENZA UPPERCASE                   */
+/*         TITOLI: RIDOTTA SPAZIATURA E STILI          */
 /* -------------------------------------------------- */
 .rating-container h3 {
   font-size: 28px;
-  color: var(--highlight-dark); /* O un colore fisso se preferisci */
-  margin-bottom: 10px; /* Ridotto da 20px a 10px */
-  text-transform: uppercase; /* Mantiene h3 in maiuscolo */
+  color: var(--highlight-dark);
+  margin-bottom: 10px;
+  text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .rating-container h4 {
   font-size: 18px;
   color: #333;
-  margin-bottom: 10px; /* Ridotto da 15px a 10px */
-  text-transform: none; /* Rimosso uppercase */
+  margin-bottom: 10px;
+  text-transform: none;
   letter-spacing: normal;
 }
 
 /* -------------------------------------------------- */
-/*  RENDI EMOTION E PARAMETER CONTAINER SIMILI         */
+/*      CONTAINER PER EMOZIONI E PARAMETRI (UNIFICATI)  */
 /* -------------------------------------------------- */
 .emotion-container,
 .parameter-container {
   width: 100%;
   max-width: 1200px;
   margin-top: 10px;
-  background-color: #fff; /* Sfondo bianco uguale per entrambi */
+  background-color: #fff;
   border-radius: 12px;
   padding: 20px;
 }
 
-/* Per le emozioni, manteniamo testo centrato */
+/* Emozioni centrali */
 .emotion-container {
   text-align: center;
 }
 
 /* -------------------------------------------------- */
-/*                SEZIONE EMOZIONI                    */
+/*                SEZIONE EMOZIONI                   */
 /* -------------------------------------------------- */
 .emotion-slider-container {
   position: relative;
@@ -75,9 +74,7 @@
   padding: 10px;
   text-align: center;
   cursor: pointer;
-  transition:
-    transform 0.3s,
-    background 0.3s;
+  transition: transform 0.3s, background 0.3s;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -100,19 +97,17 @@
   transform: translateY(-5px) scale(1.1);
 }
 
-/* Frecce di navigazione per mobile */
+/* Pulsanti freccia per mobile (mostrati via media query) */
 .arrow-btn {
-  display: none; /* Vengono mostrate in media query mobile */
+  display: none;
 }
 
 /* -------------------------------------------------- */
-/*        SEZIONE SLIDER (PARAMETRI MUSICALI)         */
+/*         SEZIONE SLIDER (PARAMETRI MUSICALI)        */
 /* -------------------------------------------------- */
-/* .parameter-container è già unificato sopra */
-
 .parameter-list-desktop {
   display: flex;
-  flex-direction: column; /* uno sotto l'altro */
+  flex-direction: column;
   align-items: center;
   gap: 20px;
   margin-top: 20px;
@@ -122,9 +117,9 @@
   text-align: center;
   margin: 0 auto;
   width: 100%;
-  max-width: 400px; /* larghezza massima di ogni slider */
+  max-width: 400px;
   display: flex;
-  flex-direction: column; /* label sopra, slider sotto */
+  flex-direction: column;
   align-items: center;
 }
 
@@ -134,28 +129,28 @@
   font-size: 16px;
   font-weight: bold;
   color: #333;
-  margin-bottom: 10px; /* un po' di spazio sotto la label */
+  margin-bottom: 10px;
 }
 
-/* Allineamento "min | slider | max" su un'unica riga, centrato */
+/* Range dello slider: label min, slider e label max */
 .slider-range {
   display: grid;
-  grid-template-columns: 70px 1fr 70px; /* min - slider - max */
+  grid-template-columns: 70px 1fr 70px;
   align-items: center;
   justify-items: center;
   gap: 10px;
   width: 100%;
 }
 
-/* Se vuoi adattare la larghezza delle etichette min/max, modifica i 70px */
 .slider-min {
   text-align: right;
 }
+
 .slider-max {
   text-align: left;
 }
 
-/* Rimuovi limiti e riempi tutta la colonna centrale */
+/* p-slider modificato per usare larghezza fluida */
 .p-slider {
   width: 100% !important;
   max-width: 550px !important;
@@ -182,7 +177,7 @@
 }
 
 /* -------------------------------------------------- */
-/*                PULSANTE DI INVIO                   */
+/*              PULSANTE DI INVIO                   */
 /* -------------------------------------------------- */
 .submit-container {
   display: flex;
@@ -191,16 +186,16 @@
 }
 
 .submit-container p-button {
-  --background: #b53c2e; /* Colore del pulsante */
+  --background: #b53c2e;
   --text-color: #fff;
 }
 
 .submit-container p-button:hover {
-  --background: #a03b2c; /* Hover più scuro */
+  --background: #a03b2c;
 }
 
 /* -------------------------------------------------- */
-/*             MOBILE STYLES (max-width:768px)        */
+/*              MOBILE STYLES (max-width:768px)       */
 /* -------------------------------------------------- */
 @media (max-width: 768px) {
   /* Nascondi la versione desktop dei parametri */
@@ -208,7 +203,7 @@
     display: none;
   }
 
-  /* Mostra la versione carousel per i parametri */
+  /* Mostra il carousel per i parametri */
   .parameter-slider-mobile {
     display: block;
   }
@@ -232,7 +227,7 @@
     display: none;
   }
 
-  /* Dots per la navigazione */
+  /* Dots di navigazione per il carousel */
   .dots-container {
     display: flex;
     justify-content: center;
@@ -257,13 +252,13 @@
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* Per uno scrolling fluido su iOS */
+    -webkit-overflow-scrolling: touch;
   }
 
   .emotion-grid {
     display: flex !important;
     flex-wrap: nowrap;
-    width: max-content; /* Forza la larghezza necessaria per contenere tutte le card */
+    width: max-content;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -279,16 +274,17 @@
     margin: 0 5px;
   }
 
+  /* Riduci il padding generale per schermi stretti */
   .rating-container {
-    padding: 0;
+    padding: 10px;
   }
 }
 
 /* -------------------------------------------------- */
-/*        DESKTOP STYLES (min-width: 769px)           */
+/*             DESKTOP STYLES (min-width: 769px)      */
 /* -------------------------------------------------- */
 @media (min-width: 769px) {
-  /* In desktop mostriamo la lista parametri “verticale” */
+  /* Mostra la versione desktop dei parametri */
   .parameter-list-desktop {
     display: flex;
   }
@@ -297,7 +293,7 @@
     display: none;
   }
 
-  /* Griglia emozioni in desktop */
+  /* Griglia delle emozioni per desktop */
   .emotion-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 2fr));
@@ -308,13 +304,63 @@
   }
 
   .parameter-item {
-    /* Aumentiamo la larghezza massima per consentire uno slider più lungo */
     max-width: 500px;
   }
 
   .slider-range {
-    /* Manteniamo 60px a sinistra e a destra per le etichette,
-       il resto (1fr) va allo slider */
     grid-template-columns: 60px 1fr 60px;
   }
+}
+
+/* -------------------------------------------------- */
+/*       BREAKPOINT PER SCHERMI MOLTO PICCOLI (max-width:480px) */
+/* -------------------------------------------------- */
+@media (max-width: 480px) {
+  .parameter-item {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .p-slider {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .slider-label {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .slider-range {
+    grid-template-columns: 50px 1fr 50px;
+  }
+
+  /* Aggiunta regola per ridurre la dimensione dei titoli su schermi molto piccoli */
+  .rating-container h3 {
+    font-size: 20px;
+  }
+
+  .rating-container h4 {
+    font-size: 16px;
+  }
+}
+
+/* -------------------------------------------------- */
+/* Classe per gestire la larghezza fluida dello slider  */
+/* -------------------------------------------------- */
+.custom-slider {
+  width: 100%;
+  display: block;
+}
+
+/* -------------------------------------------------- */
+/* Container dello slider: si assicura una larghezza massima e centratura */
+/* -------------------------------------------------- */
+.slider-range {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px; /* Adatta i valori in base alle tue esigenze */
+  align-items: center;
+  width: 100%;
+  max-width: 550px; /* Limite massimo desiderato, modificabile */
+  margin: 0 auto;
 }

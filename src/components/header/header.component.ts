@@ -13,6 +13,7 @@ import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import { TagVocabularyHelper } from '../../services/tag-classifier.service';
+import { SpotifyPlayerService } from '../../services/spotify-player.service';
 
 @Component({
   selector: 'app-header',
@@ -31,7 +32,8 @@ export class HeaderComponent {
     private router: Router,
     private messageService: MessageService,
     private stepService: StepService,
-    private eRef: ElementRef
+    private eRef: ElementRef,
+    private spotifyPlayerService: SpotifyPlayerService
   ) {}
 
   @HostListener('document:click', ['$event.target'])
@@ -54,6 +56,8 @@ export class HeaderComponent {
 
   logout(): void {
     this.menuVisible = false;
+    // Interrompi la riproduzione se una traccia è in esecuzione
+    this.spotifyPlayerService.pause();
     Promise.all([
       Preferences.remove({ key: 'spotifyAccessToken' }),
       Preferences.remove({ key: 'spotifyRefreshToken' }),

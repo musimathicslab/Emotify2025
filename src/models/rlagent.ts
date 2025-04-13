@@ -20,11 +20,10 @@ export class RLAgent {
 
   private createQNetwork(inputDim: number, outputDim: number): tf.Sequential {
     const model = tf.sequential();
-    model.add(
-      tf.layers.dense({ inputShape: [inputDim], units: 64, activation: 'relu' })
-    );
+    model.add(tf.layers.dense({ inputShape: [inputDim], units: 64, activation: 'relu' }));
     model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
-    model.add(tf.layers.dense({ units: outputDim }));
+    // Layer finale con 'sigmoid' per output compresi tra 0 e 1
+    model.add(tf.layers.dense({ units: outputDim, activation: 'sigmoid' }));
     model.compile({ optimizer: this.optimizer, loss: 'meanSquaredError' });
     console.log('RL Agent Q-Network:');
     model.summary();
@@ -39,16 +38,21 @@ export class RLAgent {
     });
   }
 
-  public async trainStep(
-    state: number[],
-    action: number,
-    reward: number
-  ): Promise<void> {
+  // Metodo per predire le audio features; l'output (range [0,1]) viene scalato a [0,100].
+  public predictNextAudioFeatures(state: number[]): number[] {
+    return tf.tidy(() => {
+      const input = tf.tensor2d([state]);
+      const output = this.qNetwork.predict(input) as tf.Tensor;
+      // Scala l'output: moltiplica ogni elemento per 100
+      const scaledOutput = output.mul(tf.scalar(100));
+      return Array.from(scaledOutput.dataSync());
+    });
+  }
+
+  public async trainStep(state: number[], action: number, reward: number): Promise<void> {
     const expectedDim = this.qNetwork.inputs[0].shape[1] as number;
     if (!state || state.length !== expectedDim) {
-      console.warn(
-        `trainStep: Stato non valido. Atteso ${expectedDim}, ottenuto ${state?.length}.`
-      );
+      console.warn(`trainStep: Stato non valido. Atteso ${expectedDim}, ottenuto ${state?.length}.`);
       return;
     }
     const qValues = this.predict(state);
@@ -98,15 +102,13 @@ export class RLAgent {
     console.log('Pesi del modello salvati nelle Preferences.');
   }
 
-  // Metodo per caricare i best weights salvati da Preferences
   public async loadBestWeightsFromPreferences(): Promise<void> {
     const result = await Preferences.get({ key: 'modelWeights' });
     if (result.value) {
       try {
         const weightsData = JSON.parse(result.value);
-        const weights = weightsData.map(
-          (w: { shape: number[]; values: number[] }) =>
-            tf.tensor(w.values, w.shape)
+        const weights = weightsData.map((w: { shape: number[]; values: number[] }) =>
+          tf.tensor(w.values, w.shape)
         );
         this.qNetwork.setWeights(weights);
         console.log('Best weights caricati correttamente.');

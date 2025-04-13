@@ -32,10 +32,7 @@
       <!-- Versione Desktop -->
       <div class="parameter-list-desktop">
         <ng-container
-          *ngFor="
-            let paramControl of parameterControls.controls;
-            let i = index
-          ">
+          *ngFor="let paramControl of parameterControls.controls; let i = index">
           <div
             class="parameter-item"
             [formGroup]="getFormGroup(paramControl)"
@@ -52,7 +49,8 @@
                 formControlName="value"
                 [min]="0"
                 [max]="100"
-                [style]="{ width: '120px' }"></p-slider>
+                class="custom-slider">
+              </p-slider>
               <span class="slider-max">{{ getSliderMaxLabel(i) }}</span>
             </div>
           </div>
@@ -68,10 +66,8 @@
               *ngTemplateOutlet="
                 parameterSlide;
                 context: {
-                  $implicit: parameterControls.at(
-                    filteredIndexes()[activeParameterIndex]
-                  ),
-                  index: filteredIndexes()[activeParameterIndex],
+                  $implicit: parameterControls.at(filteredIndexes()[activeParameterIndex]),
+                  index: filteredIndexes()[activeParameterIndex]
                 }
               ">
             </ng-container>
@@ -104,11 +100,10 @@
             formControlName="value"
             [min]="0"
             [max]="100"
-            [style]="{ width: '120px' }"></p-slider>
+            class="custom-slider">
+          </p-slider>
           <span class="slider-max">{{ getSliderMaxLabel(index) }}</span>
         </div>
-        <!-- Mostra il valore numerico sotto lo slider -->
-        <span class="slider-value">{{ param.get('value')?.value }}</span>
       </div>
     </ng-template>
 
