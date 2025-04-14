@@ -72,7 +72,6 @@ export class RatingComponent implements OnInit {
     'Quanto è ballabile la traccia.',
     'Quanto è strumentale (senza voce).',
     'Percentuale di parlato nel brano.',
-    
   ];
 
   constructor(

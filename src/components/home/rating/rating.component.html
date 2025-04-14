@@ -32,7 +32,10 @@
       <!-- Versione Desktop -->
       <div class="parameter-list-desktop">
         <ng-container
-          *ngFor="let paramControl of parameterControls.controls; let i = index">
+          *ngFor="
+            let paramControl of parameterControls.controls;
+            let i = index
+          ">
           <div
             class="parameter-item"
             [formGroup]="getFormGroup(paramControl)"
@@ -66,8 +69,10 @@
               *ngTemplateOutlet="
                 parameterSlide;
                 context: {
-                  $implicit: parameterControls.at(filteredIndexes()[activeParameterIndex]),
-                  index: filteredIndexes()[activeParameterIndex]
+                  $implicit: parameterControls.at(
+                    filteredIndexes()[activeParameterIndex]
+                  ),
+                  index: filteredIndexes()[activeParameterIndex],
                 }
               ">
             </ng-container>

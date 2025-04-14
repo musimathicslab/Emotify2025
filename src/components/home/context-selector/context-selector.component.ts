@@ -62,9 +62,7 @@ export class ContextSelectorComponent implements OnInit {
   allActivities = ACTIVITIES;
   filteredActivities = this.allActivities;
 
-  constructor(
-    private stepService: StepService,
-  ) {}
+  constructor(private stepService: StepService) {}
 
   async ngOnInit(): Promise<void> {
     // Verifica se l'app è in modalità mobile

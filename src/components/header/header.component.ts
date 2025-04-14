@@ -32,7 +32,7 @@ export class HeaderComponent {
     private router: Router,
     private messageService: MessageService,
     private stepService: StepService,
-    private eRef: ElementRef,
+    private eRef: ElementRef
   ) {}
 
   @HostListener('document:click', ['$event.target'])

@@ -74,7 +74,9 @@
   padding: 10px;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.3s, background 0.3s;
+  transition:
+    transform 0.3s,
+    background 0.3s;
   display: flex;
   flex-direction: column;
   align-items: center;
