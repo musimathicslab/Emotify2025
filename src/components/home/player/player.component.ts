@@ -79,7 +79,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
   private recentlyPlayedKey = 'recentlyPlayedData';
   private readonly RECENTLY_PLAYED_MAX_AGE = 5 * 60 * 60 * 1000;
   private recentlyPlayed: string[] = [];
-  private isLoadingNewSong = false;
+  isLoadingNewSong = false;
   private emotionTrainingCounts: { [emotion: number]: number } = {};
   trainingLimit = 10; // Limite per ogni emozione
 
@@ -215,7 +215,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
         this.formGroup.patchValue({ value: progress }, { emitEvent: false });
 
         // Se il progress è ≥98 e non è già stato triggerato il cambio traccia:
-        if (this.progress >= 98 && !this.nextTrackTriggered) {
+        if (this.progress >= 99 && !this.nextTrackTriggered) {
           this.nextTrackTriggered = true;  // Blocca invocazioni ripetute
 
           // Se non abbiamo completato il training, verifica se è necessario chiedere la valutazione
@@ -292,7 +292,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.isTrackRated && !this.isWarningShown) {
+    if (!this.isTrackRated && !(this.currentTrainingCount >= this.trainingLimit)) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Valutazione richiesta',
@@ -303,7 +303,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
       this.isWarningShown = true;
       return;
     }
-
+    
     this.isTrackRated = false;
     this.isWarningShown = false;
     this.spotifyPlayerService.nextTrack();

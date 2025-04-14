@@ -298,3 +298,18 @@
     text-align: center; /* Assicurati che il testo all'interno della card sia centrato */
   }
 }
+
+
+/* Esempio di classe per lo spinner overlay */
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7); /* Sfondo semi-trasparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}

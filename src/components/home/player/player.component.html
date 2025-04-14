@@ -139,3 +139,9 @@
     </div>
   </p-card>
 </ng-template>
+
+
+<div class="login-card spinner-overlay" *ngIf="isLoadingNewSong">
+  <p-progress-spinner></p-progress-spinner>
+  <p class="loading-text">Caricamento in corso della nuova canzone...</p>
+</div>
