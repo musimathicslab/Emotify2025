@@ -125,10 +125,6 @@ export class RatingComponent implements OnInit {
     return this.parameterTooltips[index] || '';
   }
 
-  goToParameter(index: number) {
-    this.activeParameterIndex = index;
-  }
-
   getFormGroup(control: AbstractControl): FormGroup {
     return control as FormGroup;
   }
@@ -144,9 +140,4 @@ export class RatingComponent implements OnInit {
     return instrumentalnessValue > 50;
   }
 
-  filteredIndexes(): number[] {
-    return this.parameterControls.controls
-      .map((_, i) => i)
-      .filter(i => this.shouldShowParameter(i));
-  }
 }

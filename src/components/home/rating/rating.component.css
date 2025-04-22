@@ -200,15 +200,7 @@
 /*              MOBILE STYLES (max-width:768px)       */
 /* -------------------------------------------------- */
 @media (max-width: 768px) {
-  /* Nascondi la versione desktop dei parametri */
-  .parameter-list-desktop {
-    display: none;
-  }
 
-  /* Mostra il carousel per i parametri */
-  .parameter-slider-mobile {
-    display: block;
-  }
   .parameter-slider-container {
     position: relative;
     overflow: hidden;
@@ -227,25 +219,6 @@
   }
   .parameter-slider-container .parameter-list::-webkit-scrollbar {
     display: none;
-  }
-
-  /* Dots di navigazione per il carousel */
-  .dots-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-  }
-  .dots-container span {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: rgba(51, 51, 51, 0.3);
-    margin: 0 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  .dots-container span.active {
-    background-color: var(--highlight-dark);
   }
 
   /* Scorrimento orizzontale per le emozioni */
@@ -290,11 +263,7 @@
   .parameter-list-desktop {
     display: flex;
   }
-  .parameter-slider-mobile,
-  .dots-container {
-    display: none;
-  }
-
+  
   /* Griglia delle emozioni per desktop */
   .emotion-grid {
     display: grid;

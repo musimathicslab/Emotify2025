@@ -59,35 +59,6 @@
           </div>
         </ng-container>
       </div>
-
-      <!-- Versione Mobile: carousel dei parametri -->
-      <div class="parameter-slider-mobile">
-        <div class="parameter-slider-container">
-          <!-- Se ci sono parametri visibili, mostro la slide corrente -->
-          <ng-container *ngIf="filteredIndexes().length > 0">
-            <ng-container
-              *ngTemplateOutlet="
-                parameterSlide;
-                context: {
-                  $implicit: parameterControls.at(
-                    filteredIndexes()[activeParameterIndex]
-                  ),
-                  index: filteredIndexes()[activeParameterIndex],
-                }
-              ">
-            </ng-container>
-          </ng-container>
-        </div>
-
-        <!-- Dots che corrispondono solo ai parametri visibili -->
-        <div class="dots-container">
-          <span
-            *ngFor="let idx of filteredIndexes(); let i = index"
-            [class.active]="i === activeParameterIndex"
-            (click)="goToParameter(i)">
-          </span>
-        </div>
-      </div>
     </div>
 
     <!-- Template per una slide (un parametro) -->

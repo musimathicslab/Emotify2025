@@ -174,14 +174,15 @@ export class EmotionMapComponent implements OnInit, AfterViewInit {
   }
 
   onTouchStart(event: TouchEvent, emotion: any): void {
-    // Previene selezione pagina
-    event.preventDefault();
+    // event.preventDefault(); // <--- RIMUOVI O COMMENTA QUESTA RIGA
     const touch = event.touches[0];
     this.hoveredEmotion = emotion;
     this.updateTooltipPosition(touch.clientX, touch.clientY);
   }
 
   onTouchEnd(): void {
+    // Potresti non aver più bisogno di onTouchEnd se pointerleave gestisce già la cosa
+    // Ma tienilo per ora per assicurarti che il tooltip si nasconda al rilascio del tocco
     this.hoveredEmotion = null;
   }
 
