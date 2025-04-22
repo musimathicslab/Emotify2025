@@ -1,6 +1,5 @@
 <div class="emotion-container">
   <h1 class="emotion-title">Scegli l’emozione che provi in questo momento:</h1>
-  <!-- Cambia il viewBox in base alla modalità -->
   <svg
     #svgContainer
     [attr.viewBox]="isMobile ? '0 0 600 800' : '0 0 900 600'"
@@ -9,9 +8,12 @@
       *ngFor="let emotion of emotions; let i = index"
       [attr.id]="'group-' + i"
       [attr.transform]="'translate(' + emotion.x + ',' + emotion.y + ')'"
-      (mouseenter)="onMouseEnter($event, emotion)"
-      (mousemove)="updateTooltipPosition($event)"
-      (mouseleave)="onMouseLeave()"
+      (pointerenter)="onPointerEnter($event, emotion)"
+      (pointermove)="updateTooltipPosition($event.clientX, $event.clientY)"
+      (pointerleave)="onPointerLeave()"
+      (touchstart)="onTouchStart($event, emotion)"
+      (touchmove)="updateTooltipPosition($event.touches[0].clientX, $event.touches[0].clientY)"
+      (touchend)="onTouchEnd()"
       (click)="onEmotionClick.emit(emotion.label)">
       <!-- Cerchi concentrici animati -->
       <circle

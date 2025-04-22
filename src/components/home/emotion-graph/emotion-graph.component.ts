@@ -446,46 +446,30 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
     level: string;
   }>();
 
-  // SVG "principale" e "overview"
   private mainSvg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private overviewSvg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
-
-  // Dimensioni del grafico principale
   private mainWidth = 1200;
   private mainHeight = 400;
-
-  // Dimensioni della miniatura
   private overviewWidth = 300;
   private overviewHeight = 80;
-
-  // Scale
   private xScaleMain!: d3.ScaleLinear<number, number>;
   private yScaleMain!: d3.ScaleLinear<number, number>;
   private xScaleOverview!: d3.ScaleLinear<number, number>;
   private yScaleOverview!: d3.ScaleLinear<number, number>;
 
   async ngAfterViewInit(): Promise<void> {
-    // Per test, forziamo isMobile a true (oppure puoi eliminarlo se non serve)
-    // this.isMobile = Capacitor.isNativePlatform?.() || false;
-    // In questo esempio, non usiamo più isMobile per mostrare/nascondere la miniatura.
-
-    // Se non viene passato un @Input, carica l'emozione dalle Preferences
     if (!this.emotion) {
       const pref = await Preferences.get({ key: 'selectedEmotion' });
       this.emotion = pref.value ? pref.value.trim().toUpperCase() : 'PAURA';
     }
-
     this.createMainGraph();
-    this.createOverviewGraph(); // Crea sempre la miniatura
+    this.createOverviewGraph();
   }
 
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
     if (changes['emotion'] && !changes['emotion'].firstChange) {
       const pref = await Preferences.get({ key: 'selectedEmotion' });
-      this.emotion = pref.value
-        ? pref.value.trim().toUpperCase()
-        : this.emotion;
-
+      this.emotion = pref.value?.trim().toUpperCase() || this.emotion;
       this.createMainGraph();
       this.createOverviewGraph();
     }
@@ -494,10 +478,13 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
   private createMainGraph(): void {
     if (!this.mainContainer?.nativeElement) return;
 
-    d3.select(this.mainContainer.nativeElement).selectAll('*').remove();
+    // Assicura che il contenitore supporti il posizionamento assoluto del tooltip
+    const containerSel = d3
+      .select(this.mainContainer.nativeElement)
+      .style('position', 'relative');
+    containerSel.selectAll('*').remove();
 
-    this.mainSvg = d3
-      .select<HTMLElement, unknown>(this.mainContainer.nativeElement)
+    this.mainSvg = containerSel
       .append<SVGSVGElement>('svg')
       .attr('width', this.mainWidth)
       .attr('height', this.mainHeight);
@@ -506,7 +493,6 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
       .scaleLinear()
       .domain([0, 100])
       .range([50, this.mainWidth - 50]);
-
     this.yScaleMain = d3
       .scaleLinear()
       .domain([0, 100])
@@ -539,7 +525,7 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
     d3.select(this.overviewContainer.nativeElement).selectAll('*').remove();
 
     this.overviewSvg = d3
-      .select<HTMLElement, unknown>(this.overviewContainer.nativeElement)
+      .select(this.overviewContainer.nativeElement)
       .append<SVGSVGElement>('svg')
       .attr('width', this.overviewWidth)
       .attr('height', this.overviewHeight)
@@ -549,7 +535,6 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
       .scaleLinear()
       .domain([0, 100])
       .range([0, this.overviewWidth]);
-
     this.yScaleOverview = d3
       .scaleLinear()
       .domain([0, 100])
@@ -651,7 +636,8 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
       .append<SVGPathElement>('path')
       .datum(dataPoints)
       .attr('fill', baseFill)
-      .attr('d', areaGenerator(dataPoints) ?? '');
+      .attr('d', areaGenerator(dataPoints) ?? '')
+      .attr('cursor', 'pointer');
 
     if (!showTooltip) {
       path.on('click', () => {
@@ -687,13 +673,13 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
       .style('opacity', '0')
       .style('transition', 'opacity 0.3s ease-in-out, transform 0.2s ease-out');
 
+    // Eventi desktop e touch
     path
-      .attr('cursor', 'pointer')
-      .on('mouseover', () => {
+      .on('mouseenter pointerenter touchstart', () => {
         path.raise().attr('fill', highlightFill);
         textElement.transition().duration(200).style('opacity', 1);
       })
-      .on('mouseout', () => {
+      .on('mouseleave pointerleave touchend', () => {
         path.attr('fill', baseFill);
         textElement.transition().duration(200).style('opacity', 0);
       })
@@ -705,9 +691,7 @@ export class EmotionGraphComponent implements AfterViewInit, OnChanges {
           .style('top', `${y - 25}px`)
           .style('opacity', '1')
           .style('transform', 'translateY(-5px)');
-
         setTimeout(() => tooltip.style('opacity', '0'), 2000);
-
         this.onEmotionClick.emit({ name: this.emotion, level: level.label });
       });
   }

@@ -100,19 +100,25 @@ export class EmotionMapComponent implements OnInit, AfterViewInit {
     },
   ];
 
-  // Questo array conterrà le emozioni correnti
-  emotions: any[] = [];
+  emotions: Array<{
+    x: number;
+    y: number;
+    baseRadius: number;
+    color: string;
+    label: string;
+  }> = [];
 
-  // Gestione tooltip
-  hoveredEmotion: any = null;
+  hoveredEmotion: {
+    x: number;
+    y: number;
+    baseRadius: number;
+    color: string;
+    label: string;
+  } | null = null;
   tooltipPosition = { x: 0, y: 0 };
 
-  constructor() {}
-
   ngOnInit(): void {
-    // Se la larghezza dello schermo è < 768, imposta la modalità mobile
     this.isMobile = window.innerWidth < 768;
-    // Seleziona l'array di emozioni appropriato
     this.emotions = this.isMobile ? this.emotionsMobile : this.emotionsDesktop;
   }
 
@@ -121,11 +127,10 @@ export class EmotionMapComponent implements OnInit, AfterViewInit {
   }
 
   animateEmotions(): void {
-    const svg = this.svgContainer.nativeElement;
-
+    const svgEl = this.svgContainer.nativeElement;
     this.emotions.forEach((emotion, index) => {
-      const circles = svg.querySelectorAll(`#group-${index} circle`);
-      const mainCircle = svg.querySelector(`#circle-${index}`);
+      const circles = svgEl.querySelectorAll(`#group-${index} circle`);
+      const mainCircle = svgEl.querySelector(`#circle-${index}`);
 
       if (mainCircle) {
         gsap.to(mainCircle, {
@@ -158,18 +163,30 @@ export class EmotionMapComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Tooltip
-  onMouseEnter(event: MouseEvent, emotion: any): void {
+  // Gestione hover/touch tooltip
+  onPointerEnter(event: PointerEvent, emotion: any): void {
     this.hoveredEmotion = emotion;
-    this.updateTooltipPosition(event);
+    this.updateTooltipPosition(event.clientX, event.clientY);
   }
 
-  onMouseLeave(): void {
+  onPointerLeave(): void {
     this.hoveredEmotion = null;
   }
 
-  updateTooltipPosition(event: MouseEvent): void {
-    this.tooltipPosition.x = event.clientX + 15;
-    this.tooltipPosition.y = event.clientY + 15;
+  onTouchStart(event: TouchEvent, emotion: any): void {
+    // Previene selezione pagina
+    event.preventDefault();
+    const touch = event.touches[0];
+    this.hoveredEmotion = emotion;
+    this.updateTooltipPosition(touch.clientX, touch.clientY);
+  }
+
+  onTouchEnd(): void {
+    this.hoveredEmotion = null;
+  }
+
+   updateTooltipPosition(x: number, y: number): void {
+    this.tooltipPosition.x = x + 15;
+    this.tooltipPosition.y = y + 15;
   }
 }

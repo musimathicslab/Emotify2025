@@ -43,7 +43,7 @@ import { getTagForFeature } from '../../../constants/tag-mapper.util';
 import { EMOTION_CONFIGURATIONS } from '../emotion-graph/emotion-graph.component';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { App } from '@capacitor/app';
-import {CapitalizePipe} from '../../../pipes/capitalize.pipe';
+import { CapitalizePipe } from '../../../pipes/capitalize.pipe';
 
 @Component({
   selector: 'app-player',
@@ -64,8 +64,7 @@ import {CapitalizePipe} from '../../../pipes/capitalize.pipe';
     Toast,
     DecimalPipe,
     RatingComponent,
-    LowerCasePipe,
-CapitalizePipe  // Importa la pipe qui
+    CapitalizePipe, // Importa la pipe qui
   ],
 })
 export class PlayerComponent implements OnInit, OnDestroy {
