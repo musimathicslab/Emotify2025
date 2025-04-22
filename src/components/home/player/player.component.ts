@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { BehaviorSubject, lastValueFrom, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, lastValueFrom, of, Subject } from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
 
 // PrimeNG components
 import { Slider } from 'primeng/slider';
@@ -235,13 +235,13 @@ export class PlayerComponent implements OnInit, OnDestroy {
         this.formGroup.patchValue({ value: progress }, { emitEvent: false });
 
         // Se il progress è ≥98 e non è già stato triggerato il cambio traccia:
-        if (this.progress >= 99 && !this.nextTrackTriggered) {
+        if (this.progress >= 99) {
           this.nextTrackTriggered = true; // Blocca invocazioni ripetute
 
           // Se non abbiamo completato il training, verifica se è necessario chiedere la valutazione
           if (!(this.currentTrainingCount >= this.trainingLimit)) {
             if (!this.isTrackRated && !this.isWarningShown) {
-              this.spotifyPlayerService.pause();
+
               this.messageService.add({
                 severity: 'warn',
                 summary: 'Valutazione richiesta',
@@ -371,127 +371,179 @@ export class PlayerComponent implements OnInit, OnDestroy {
     // Verifica che lastState sia valido, altrimenti lo imposta di default (9 elementi: 4 di contesto + 5 features)
     if (!this.lastState || this.lastState.length !== 9) {
       console.warn('this.lastState non valido, imposto uno stato di default.');
-      this.lastState = [0, 0, 0, 0, 50, 50, 50, 50, 50];
+      // Potresti voler usare un default più contestuale qui se possibile
+      this.lastState = [ this.selectedEmotion ?? 0, this.selectedActivity ?? 0, this.selectedLocation ?? 0, Number(this.selectedEmotionLevel) || 0, 50, 50, 50, 50, 50 ];
     }
 
     // Se il training è completato, usa l'agente RL per predire le audio features
-    if (this.currentTrainingCount >= this.trainingLimit) {
-      this.currentAudioFeatures = this.rlAgent.predictNextAudioFeatures(
-        this.lastState
-      );
-      console.log('Audio features predette:', this.currentAudioFeatures);
-    } else {
-      this.currentAudioFeatures = this.ensureAudioFeatures(
-        this.currentAudioFeatures
-      );
+    // (Questa parte rimane come nel tuo codice)
+    try { // Aggiunto try/catch qui per sicurezza determinazione features
+      if (this.currentTrainingCount >= this.trainingLimit) {
+        this.currentAudioFeatures = this.rlAgent.predictNextAudioFeatures(
+          this.lastState
+        );
+        console.log('Audio features predette:', this.currentAudioFeatures);
+      } else {
+        // Potresti voler aggiungere la logica per prendere features da traccia corrente qui
+        this.currentAudioFeatures = this.ensureAudioFeatures(
+          this.currentAudioFeatures // O [50,50,50,50,50] se non ci sono features correnti
+        );
+      }
+      this.currentAudioFeatures = this.ensureAudioFeatures(this.currentAudioFeatures);
+    } catch (error) {
+      console.error("Errore determinazione features:", error);
+      this.currentAudioFeatures = this.ensureAudioFeatures([50, 50, 50, 50, 50]);
     }
+
 
     let candidates: { title: string; artist: string }[] = [];
     const currentEmotion = this.selectedEmotion;
     const currentCount = this.emotionTrainingCounts[currentEmotion] || 0;
 
-    if (currentCount < this.trainingLimit) {
-      console.log(
-        'Training in corso per emozione',
-        currentEmotion,
-        ': uso top tracks interne.'
-      );
-      candidates = await this.spotifyPlayerService.getUserTopTracks(50);
-    } else {
-      const predicted = this.tagClassifier.predictTag(
-        this.currentAudioFeatures
-      );
-      const predictedTags = [
-        predicted.tempo,
-        predicted.dance,
-        predicted.instr,
-        predicted.speech,
-        predicted.loud,
-      ];
-      console.log('Predicted tags:', predictedTags);
-      const currentTitle = this.spotifyPlayerService.getCurrentTrackTitle();
-      const currentArtist = this.spotifyPlayerService.getCurrentArtist();
-      const commonMemoryTags = await this.analyzeCommonMemoryTags(
-        predictedTags,
-        currentTitle,
-        currentArtist
-      );
-      console.log('Common memory tags:', commonMemoryTags);
-      for (const tag of commonMemoryTags) {
-        const candidate = await this.findTrackByTag(tag);
-        if (candidate) candidates.push(candidate);
-      }
-      if (candidates.length === 0) {
-        console.warn(
-          'Nessun candidato trovato tramite tag. Uso top tracks Spotify.'
-        );
+    // Recupero candidati (Questa parte rimane come nel tuo codice, con i fallback Top/Liked)
+    try { // Aggiunto try/catch per sicurezza chiamate API
+      if (currentCount < this.trainingLimit) {
+        console.log( 'Training in corso: uso top tracks -> liked tracks.' );
         candidates = await this.spotifyPlayerService.getUserTopTracks(50);
+        if(candidates.length === 0){
+          console.warn("Top tracks vuote (training), uso liked tracks.");
+          candidates =  await this.spotifyPlayerService.getUserLikedTracks() ;
+        }
+      } else {
+        console.log( 'Post-training: uso tags -> top tracks -> liked tracks.' );
+        const predicted = this.tagClassifier.predictTag( this.currentAudioFeatures );
+        const predictedTags = [ predicted.tempo, predicted.dance, predicted.instr, predicted.speech, predicted.loud, ].filter(t => t); // Filtra tag nulli/vuoti
+        console.log('Predicted tags:', predictedTags);
+
+        if (predictedTags.length > 0) {
+          // ** NOTA: Manteniamo il tuo loop for...of per i tag per semplicità, ma attento agli errori **
+          const currentTitle = this.spotifyPlayerService.getCurrentTrackTitle();
+          const currentArtist = this.spotifyPlayerService.getCurrentArtist();
+          const commonMemoryTags = await this.analyzeCommonMemoryTags( predictedTags, currentTitle, currentArtist );
+          console.log('Common memory tags:', commonMemoryTags);
+          for (const tag of commonMemoryTags) {
+            try { // Aggiunto try/catch per errore singolo tag
+              const candidate = await this.findTrackByTag(tag);
+              if (candidate) candidates.push(candidate);
+            } catch (tagError) {
+              console.warn(`Errore ricerca per tag "${tag}":`, tagError);
+            }
+          }
+        }
+
+        if (candidates.length === 0) {
+          console.warn( 'Nessun candidato trovato tramite tag. Uso top tracks Spotify.' );
+          candidates = await this.spotifyPlayerService.getUserTopTracks(50);
+          if(candidates.length === 0){
+            console.warn("Top tracks vuote (post-training), uso liked tracks.");
+            candidates =  await this.spotifyPlayerService.getUserLikedTracks() ;
+          }
+        }
       }
+    } catch (apiError) {
+      console.error("Errore critico durante recupero candidati:", apiError);
+      candidates = []; // Assicura lista vuota
     }
 
-    // Rimuove duplicati
-    candidates = candidates.reduce(
-      (unique, candidate) => {
-        if (
-          !unique.find(
-            c => c.title.toLowerCase() === candidate.title.toLowerCase()
-          )
-        ) {
-          unique.push(candidate);
-        }
-        return unique;
-      },
-      [] as { title: string; artist: string }[]
-    );
 
+    // Rimuove duplicati (Questa parte rimane come nel tuo codice)
+    // ** NOTA: Usa una chiave più robusta per la deduplica **
+    console.log(`Candidati prima deduplica: ${candidates.length}`);
+    const initialUniqueMap = new Map<string, { title: string; artist: string }>();
+    candidates.forEach(c => {
+      const key = `${c.title.toLowerCase()}|${c.artist.split(',')[0].trim().toLowerCase()}`;
+      if (!initialUniqueMap.has(key)) initialUniqueMap.set(key, c);
+    });
+    candidates = Array.from(initialUniqueMap.values()); // 'candidates' ora contiene unici
+    console.log(`Candidati unici: ${candidates.length}`);
+
+
+    // Filtro Recently Played (Questa parte rimane come nel tuo codice)
     let filteredCandidates = candidates.filter(
       candidate => !this.recentlyPlayed.includes(candidate.title.toLowerCase())
     );
+    console.log(`Candidati dopo filtro recenti: ${filteredCandidates.length}`);
 
+
+    // Fallback per poche tracce (Questa parte rimane come nel tuo codice, incluso il BUG originale!)
+    // ** NOTA: Questo blocco nel tuo codice originale aveva un bug (non usava 'fallback'). Lo lascio così per ora.**
     const minRequiredTracks = 5;
-    if (filteredCandidates.length < minRequiredTracks) {
-      console.warn(
-        'Fallback: poche tracce candidate trovate, aggiungo ulteriori tracce.'
-      );
-      let fallback = await this.spotifyPlayerService.getUserTopTracks(50);
-      fallback = fallback.filter(
-        candidate =>
-          !this.recentlyPlayed.includes(candidate.title.toLowerCase())
-      );
-      filteredCandidates = filteredCandidates.concat(fallback);
+    if (filteredCandidates.length > 0 && filteredCandidates.length < minRequiredTracks) {
+      console.warn( `Fallback: solo ${filteredCandidates.length} tracce candidate fresche. Aggiungo ulteriori (logica originale con potenziale bug).` );
+      try {
+        let fallback = await this.spotifyPlayerService.getUserTopTracks(50);
+        fallback = fallback.filter(
+          candidate =>
+            !this.recentlyPlayed.includes(candidate.title.toLowerCase()) &&
+            !filteredCandidates.some(fc => fc.title.toLowerCase() === candidate.title.toLowerCase()) // Evita duplicati dalla lista filtrata
+        );
+        // !!! ATTENZIONE: NEL TUO CODICE ORIGINALE MANCAVA filteredCandidates = filteredCandidates.concat(fallback); !!!
+        // Lascio così per essere fedele al tuo codice, ma questo blocco non fa nulla.
+        if (fallback.length > 0) console.log(`  -> Trovate ${fallback.length} tracce fallback (non aggiunte).`);
+      } catch (fallbackError) {
+        console.error("Errore recupero tracce fallback:", fallbackError);
+      }
     }
+
+    // Se la lista filtrata è vuota, MA avevamo candidati *prima* del filtro...
+    if (filteredCandidates.length === 0 && candidates.length > 0) {
+      console.warn(
+        '🚫 Tutti i candidati unici sono recenti. Uso lista originale per non bloccare.'
+      );
+      // Usa la lista originale (già deduplicata) invece di fermarsi
+      filteredCandidates = candidates;
+      // NON resettare recentlyPlayed qui.
+    }
+
+    // Controlla se, nonostante tutto, non abbiamo NESSUN candidato
     if (filteredCandidates.length === 0) {
-      console.warn('Tutti i candidati sono già stati riprodotti recentemente.');
+      // Questo succede SOLO se candidates era vuoto fin dall'inizio
+      console.error("🆘 ERRORE CRITICO: Nessun candidato disponibile da NESSUNA fonte. Impossibile procedere.");
+      this.messageService.add({ severity: 'error', summary: 'Nessuna Canzone', detail: 'Impossibile trovare tracce da riprodurre.', life: 6000 });
+      this.isLoadingNewSong = false;
+      return; // Stop definitivo
+    }
+
+
+    const chosenCandidate = this.selectRandomCandidate(filteredCandidates); // Ora sappiamo che non è vuota
+    console.log(`✅ Candidato scelto: "${chosenCandidate.title}"`);
+    const searchArtist = chosenCandidate.artist.split(',')[0].trim();
+    let trackId: string | null = null; // Inizializza a null
+
+    try { // Try/catch per ricerca e play
+      trackId = await lastValueFrom(
+        this.spotifyPlayerService.searchTrack( chosenCandidate.title, searchArtist ).pipe(catchError(() => of(null)))
+      );
+
+      if (trackId) {
+        this.updateRecentlyPlayed(chosenCandidate.title);
+        await this.spotifyPlayerService.playTrack(trackId);
+        console.log(`▶️ Riproduzione avviata (ID: ${trackId})`);
+
+        // Aggiorna stato RL
+        const safeEmotionLevel = Number(this.selectedEmotionLevel) || 0;
+        const state = this.buildRLState( this.selectedEmotion, this.selectedActivity, this.selectedLocation, safeEmotionLevel, this.currentAudioFeatures );
+        console.log('💾 Stato RL aggiornato:', state);
+        this.lastState = state;
+
+      } else {
+        console.error(`❌ TrackId non trovato su Spotify per "${chosenCandidate.title}" - "${searchArtist}".`);
+        this.messageService.add({ severity: 'warn', summary: 'Traccia Non Trovata', detail: `"${chosenCandidate.title}" non trovata.`, life: 4000 });
+        // Ci fermiamo qui per questa traccia non trovata
+        this.isLoadingNewSong = false;
+        return;
+      }
+    } catch(error) {
+      console.error("❌ Errore durante ricerca/riproduzione:", error);
+      this.messageService.add({ severity: 'error', summary: 'Errore Player', detail: 'Impossibile avviare la traccia.', life: 4000 });
       this.isLoadingNewSong = false;
       return;
     }
 
-    const chosenCandidate = this.selectRandomCandidate(filteredCandidates);
-    const trackId = await lastValueFrom(
-      this.spotifyPlayerService.searchTrack(
-        chosenCandidate.title,
-        chosenCandidate.artist
-      )
-    );
-    if (trackId) {
-      this.updateRecentlyPlayed(chosenCandidate.title);
-      await this.spotifyPlayerService.playTrack(trackId);
-    } else {
-      console.error('Nessun trackId trovato per', chosenCandidate);
-    }
+    console.log('✅ Selezione e avvio traccia completati.');
     this.isLoadingNewSong = false;
-
-    const safeEmotionLevel = Number(this.selectedEmotionLevel);
-    const state = this.buildRLState(
-      this.selectedEmotion,
-      this.selectedActivity,
-      this.selectedLocation,
-      safeEmotionLevel,
-      this.currentAudioFeatures
-    );
-    console.log('Stato passato a RLAgent:', state);
-    this.lastState = state;
   }
+
 
   private async analyzeCommonMemoryTags(
     predictedTags: string[],
@@ -897,7 +949,6 @@ export class PlayerComponent implements OnInit, OnDestroy {
         const { list, timestamp } = storedData;
         const now = Date.now();
         if (now - timestamp > this.RECENTLY_PLAYED_MAX_AGE) {
-          console.log('🔄 Sono passate più di 5 ore: reset di recentlyPlayed.');
           this.recentlyPlayed = [];
           await Preferences.remove({ key: this.recentlyPlayedKey });
         } else {

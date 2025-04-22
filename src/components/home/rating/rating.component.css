@@ -263,7 +263,7 @@
   .parameter-list-desktop {
     display: flex;
   }
-  
+
   /* Griglia delle emozioni per desktop */
   .emotion-grid {
     display: grid;
